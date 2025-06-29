@@ -1,0 +1,70 @@
+import os, sys
+
+from musictypes import TypeString, TypeMudObject, TypeNil, TypeUnion, TypeTable, TypeNumber, TypeBool
+
+valid_events: dict[str, bool | list[str]] = {}
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from lib import events
+
+for event in events.parse_events():
+        event_name = event.name
+
+        event_args = event.params
+
+        if event_args is None:
+                valid_events[event_name] = True
+                continue
+
+        def arg_type(s):
+                if s.name == "arg":
+                        type = TypeTable(value=TypeString(tainted=True))
+                elif s.name == "txt":
+                        type = TypeString(tainted=True)
+                elif s.name == "pl":
+                        type = TypeMudObject(invoker=True)
+                elif s.type == "string":
+                        type = TypeNumber()
+                elif s.type == "int":
+                        type = TypeNumber()
+                elif s.type == "bool":
+                        type = TypeBool()
+                elif s.type == "mudobject":
+                        type = TypeMudObject()
+                else:
+                        print("unknown type!")                
+
+                if s.optional:
+                        return TypeUnion(TypeNil(), type)
+                
+                if type == TypeString:
+                        return type(tainted=True)
+
+                return type
+
+        fixed_args = {arg.name: arg_type(arg) for arg in event_args}
+        valid_events[event_name] = fixed_args
+
+valid_event_prefixes = {"tell.": True, "checklist.": True, "trap.": True, "lib": True, "verb.": True, "schema": True, "primitives": True, "helpers": True}
+
+
+def check_valid_action(verb):
+        from functions import VERBS
+        return VERBS.get(verb) is not None
+
+
+def check_valid_event(event):
+        if event.startswith(prefix := "lua."):
+                event = event[len(prefix):]
+
+        if event in valid_events:
+                return valid_events.get(event)
+
+        if any(event.startswith(prefix) for prefix in valid_event_prefixes):
+                return True
+        
+        if "." in event:
+                ev = event.split(".")[0] + ".*"
+                if ev in valid_events:
+                        return valid_events.get(ev)
