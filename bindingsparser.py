@@ -127,7 +127,7 @@ def parse_bindings(file):
                                 else:
                                         min_args += 1
 
-                                if argname == "varargs":
+                                if argname == "..." or "..." in argtype:
                                         var_args = True
 
                                 if name == "set" and i == 2:
