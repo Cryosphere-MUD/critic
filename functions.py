@@ -1,4 +1,4 @@
-from musictypes import TypeString, TypeMudObject, TypeAny, TypeUnionType, TypeSpecificMudObject, TypeNil, TypeUnion, TypeNumberRange, TypeNumber, TypeStringKnownPrefix, TypeTable, TypeZoneTag, TypeTranslatedString
+from musictypes import TypeString, TypeMudObject, TypeAny, TypeUnionType, TypeSpecificMudObject, TypeNil, TypeUnion, TypeNumberRange, TypeNumber, TypeStringKnownPrefix, TypeTable, TypeZoneTag, TypeTranslatedString, AnyModule
 import json
 from spellcheck import spellcheck
 
@@ -31,6 +31,21 @@ def is_abstract(obj):
 def global_lang(self, args):
         obj = self.get_type(args[0])
         return TypeTranslatedString(*obj.values)
+
+
+def global_import(self, args):
+	obj = self.get_type(args[0])
+	if isinstance(obj, TypeString):
+		for value in obj.strings():
+			if self.check_objectid(value):
+				return TypeAny()
+			else:
+				self.error("missing import", args[0])
+				self.panic()
+				return TypeAny()
+
+	return TypeAny()
+
 
 
 def global_get(self, args):
