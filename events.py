@@ -77,7 +77,7 @@ for event in events.parse_events():
 
         valid_events[event_name] = MudEvent(event_args, event.return_type)
 
-valid_event_prefixes = {"tell.": True, "checklist.": True, "trap.": True, "lib": True, "verb.": True, "schema": True, "primitives": True, "helpers": True}
+valid_event_prefixes = {"checklist.": True, "lib": True, "verb.": True, "schema": True, "primitives": True, "helpers": True}
 
 
 def check_valid_action(verb):

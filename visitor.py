@@ -1376,14 +1376,9 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor):
 
                         if not types:
                                 return
-
-                        if types == [TypeNumberRange(0)]:
-                                return
-
-                        if types == [TypeNumberRange(1)]:
-                                return
-
-                        if types == [TypeAny()]:
+                        
+                        if self.state.expected_return_type == [TypeNil()]:
+                                #self.warning(f"unexpected return value in trap with no return expected", node.values[0])
                                 return
 
                         num_expected = len(self.state.expected_return_type or [])
