@@ -384,7 +384,14 @@ class TypeNumberRange(TypeNumber):
 
         def convertible_from(self, source):
                 if type(self) == type(source):
+                        if source.min_value < self.min_value:
+                                return False
+                        if source.max_value > self.min_value:
+                                return False
                         return True
+                
+                if isinstance(source, TypeNumber):
+                        return False
                 
                 return super().convertible_from(source)
 
