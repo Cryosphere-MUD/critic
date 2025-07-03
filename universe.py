@@ -1,4 +1,5 @@
 import json
+from types import MappingProxyType
 
 from musictypes import TypeSpecificMudObject
 
@@ -37,3 +38,5 @@ for obj in UNIVERSE:
         if treatas := obj.get("treatas"):
                 if treatas != obj.get("id"):
                         TREATAS_USERS.setdefault(treatas, []).append(obj)
+
+UNIVERSE_BY_ID = MappingProxyType(UNIVERSE_BY_ID)
