@@ -241,6 +241,12 @@ class TypeMudObject(TypeBase):
                 if isinstance(source, TypeSpecificMudObject):
                         return True
 
+                if isinstance(source, TypeString) and source.values:
+                        for value in source.values:
+                                if not CHECK_MUDOBJECT_ID(value):
+                                        return False
+                        return True
+                        
                 return super().convertible_from(source)
 
         def check_field(self, fieldname):

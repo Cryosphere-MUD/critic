@@ -66,6 +66,12 @@ class MudEvent:
         def items(self):
                 yield from self._args.items()
 
+        def keys(self):
+                yield from self._args.keys()
+
+        def values(self):
+                yield from self._args.values()
+
 for event in events.parse_events():
         event_name = event.name
 

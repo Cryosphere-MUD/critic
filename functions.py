@@ -35,17 +35,17 @@ def global_lang(self, args):
 
 
 def global_import(self, args):
-	obj = self.get_type(args[0])
-	if isinstance(obj, TypeString):
-		for value in obj.strings():
-			if self.check_objectid(value):
-				return TypeAny()
-			else:
-				self.error("missing import", args[0])
-				self.panic()
-				return TypeAny()
+        obj = self.get_type(args[0])
+        if isinstance(obj, TypeString):
+                for value in obj.strings():
+                        if self.check_objectid(value):
+                                return TypeAny()
+                        else:
+                                self.error("missing import", args[0])
+                                self.panic()
+                                return TypeAny()
 
-	return TypeAny()
+        return TypeAny()
 
 
 
@@ -543,21 +543,45 @@ def global_pairs(self, args):
 
 def global_trap_exec(self, args):
 
-	trap = self.get_type(args[0])
-	for val in trap.strings():
-		event_type = check_valid_event(val)
-		if not event_type:
-			self.error(f"call to unrecognised event {val}", args[0])
+        trap = self.get_type(args[0])
 
-		# if event_type is True:
-		# 	return
+        types = []
 
-		# passed_types = self.get_types(args)
+        for val in trap.strings():
+                event_type = check_valid_event(val)
+                if not event_type:
+                        self.error(f"call to unrecognised event {val}", args[0])
+                        
+                if event_type is True:
+                        return
+                
+                passed_types = self.get_types(args)
 
-		# idx = 1
+                idx = 1
 
-		# for name, type in event_type.items():
-		# 	if not type.convertible_from(passed_types[idx]):
-		# 		self.error(f"can't convert {passed_types[idx]} to {type}", args[idx])
-		# 	idx += 1
-		
+                arg_names = ["pl", "o1", "o2", "treatas", "o3", "txt", "extra"]
+
+                orig_items = dict(event_type.items())
+
+                event_items = [TypeString()]
+
+                for arg in arg_names:
+                        if arg_type := orig_items.get(arg):
+                                event_items.append(arg_type)
+                        else:
+                                event_items.append(TypeNil())
+
+                while len(event_items) < len(passed_types):
+                        event_items.append(TypeNil())
+                
+                for passed, type, arg in zip(passed_types, event_items, args):
+                        if type == TypeNil():
+                                continue
+                        if not type.convertible_from(passed.denil()):
+                                self.error(f"can't convert {passed} to {type}", arg)
+                
+                types.append(event_type.return_type[0])
+
+        if types:
+                return TypeUnion(*types)
+        
