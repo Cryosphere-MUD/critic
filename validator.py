@@ -8,7 +8,7 @@ from musictypes import TypeSpecificMudObject, TypeUnion, TypeMudObject, TypeStri
 from visitor import MusicLUAVisitor
 from environment import make_global_scope
 from universe import UNIVERSE, UNIVERSE_BY_ID, TREATAS_USERS
-from events import check_valid_event
+from events import MudEvent, check_valid_event
 from symbolresolver import resolve_symbols
 import parents
 from validatorstate import ValidatorState
@@ -27,13 +27,13 @@ BINDINGS = {}
 import pprint
 
 for binding_filename in glob.glob(get_bindings_glob()):
-	with open(binding_filename, "r") as file:
-		bindings, modules, klass = parse_bindings(file)
-		BINDINGS.update(bindings)		
-		MODULE_SYMBOLS.update(modules)
-		
-		for classname, methods in klass.items():
-			CLASS_METHODS.setdefault(classname, {}).update(methods)
+        with open(binding_filename, "r") as file:
+                bindings, modules, klass = parse_bindings(file)
+                BINDINGS.update(bindings)		
+                MODULE_SYMBOLS.update(modules)
+                
+                for classname, methods in klass.items():
+                        CLASS_METHODS.setdefault(classname, {}).update(methods)
                 
 
 got_error = False
@@ -74,7 +74,7 @@ default_context = {"o1": TypeMudObject(),
                                    "txt": TypeString(tainted=True),
                                    "arg": TypeTable(value=TypeString(tainted=True))}
 
-def validate_chunk(lua, context = None, rewrite_warning_disabled = False, itemid = None, no_detailed = False):
+def validate_chunk(lua, context = None, rewrite_warning_disabled = False, itemid = None, no_detailed = False, return_type = None):
 
         if context is None:
                 context = dict(default_context)
@@ -107,6 +107,7 @@ def validate_chunk(lua, context = None, rewrite_warning_disabled = False, itemid
         state.error_handler = error
         state.class_methods = CLASS_METHODS
         state.object_id = itemid
+        state.expected_return_type = return_type
 
         state.resolutions, state.scopes = resolve_symbols(tree, state)
 
@@ -215,19 +216,30 @@ for item in UNIVERSE:
                         context = dict(default_context)
 
                         event_validity = check_valid_event(chunkpart)
+
+                        return_type = None
+
                         if not event_validity:
                                 if args.unknown:
                                         error(f"unknown event {chunkpart}")
                         elif isinstance(event_validity, dict):
                                 context = event_validity
-                        elif isinstance(event_validity, list):
-                                context = {arg: context.get(arg) for arg in event_validity}
+                        elif isinstance(event_validity, MudEvent):
+                                for event_arg, event_value in event_validity.items():
+                                        context[event_arg] = event_value
+                                return_type = event_validity.return_type
 
                         if itemid and itemid not in TREATAS_USERS:
                                 context["o1"] = TypeSpecificMudObject(item)
                         else:
                                 specifics = list(TypeSpecificMudObject(obj) for obj in TREATAS_USERS[itemid])
                                 context["o1"] = TypeUnion(*specifics)
+
+                        if key.startswith("lua.lib"):
+                                return_type = [TypeAny()]
+
+                        if key.startswith("lua.verb"):
+                                return_type = [TypeAny()]
 
                         context["event"] = TypeMap(context)
 
@@ -236,7 +248,7 @@ for item in UNIVERSE:
                         file = itemid + "." + key
 
                         try:
-                                validate_chunk(value, context, rewrite_warning_disabled, itemid, no_detailed = no_detailed)
+                                validate_chunk(value, context, rewrite_warning_disabled, itemid, no_detailed = no_detailed, return_type = return_type)
                         except KeyboardInterrupt:
                                 print("interrupting")
                                 exit(1)

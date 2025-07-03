@@ -21,6 +21,9 @@ def conv_type(argtype, isarg = False):
         if constructor := basic_types.get(argtype):
                 return constructor()
 
+        if argtype == "any":
+               return TypeAny()
+
         if argtype.startswith("object") or argtype.startswith("player"):
                 if isarg:
                         return TypeMudObjectOrID()
@@ -127,7 +130,7 @@ def parse_bindings(file):
                                 else:
                                         min_args += 1
 
-                                if argname == "..." or "..." in argtype:
+                                if argname == "varargs" or "..." in argtype:
                                         var_args = True
 
                                 if name == "set" and i == 2:

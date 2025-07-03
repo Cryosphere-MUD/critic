@@ -117,6 +117,8 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor):
 
                 self.deferred_validate = []
 
+                self.doing_deferred = 0
+
         def check_objectid(self, id):
 
                 if id in self._universe:
@@ -345,7 +347,9 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor):
         def exit_Chunk(self, node):
                 for type in self.deferred_validate:
                         if type.deferred_validate:
+                                self.doing_deferred += 1
                                 self.visit(type.node.body)
+                                self.doing_deferred -= 1
                                 type.deferred_validate = False
 
         def enter_Function(self, node):
@@ -1016,7 +1020,7 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor):
                 #         if isinstance(parm, TypeUnionType):
                 #                 return all(is_numeric(subparm) for subparm in parm.types())
                 #         return False
-	
+        
                 # if not is_numeric(left_type):
                 #         self.error(f"invalid type {left_type} to rhs of +", node.left)
                 # if not is_numeric(right_type):
@@ -1216,7 +1220,10 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor):
                 if isinstance(symbol_type, TypeMap):
                         if node.notation == ast.IndexNotation.DOT:
                                 assert isinstance(node.idx, astnodes.Name)
-                                self.set_type(node, symbol_type.get_member(node.idx.id))
+                                the_type = symbol_type.get_member(node.idx.id)
+                                if the_type is None:
+                                        self.error(f"no field {node.idx.id} in {symbol}", node.idx)
+                                self.set_type(node, the_type)
                                 return
                         self.set_type(node, TypeAny())
                         return 
@@ -1335,7 +1342,9 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor):
                         symbol.visiting_from_call += 1
                         symbol.deferred_validate = False # avoid recursion
                         self.deferred_validate.remove(symbol)
+                        self.doing_deferred += 1
                         self.visit(symbol.node.body)
+                        self.doing_deferred -= 1
 
                         symbol.visiting_from_call -= 1
 
@@ -1359,5 +1368,30 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor):
 
                 self.set_terminating(node, True)
 
+                types = self.get_types(node.values)
+
                 if len(self._return_frames):
-                        self._return_frames[-1].add_return(self.get_types(node.values))
+                        self._return_frames[-1].add_return(types)
+                elif not self.doing_deferred:
+
+                        if not types:
+                                return
+
+                        if types == [TypeNumberRange(0)]:
+                                return
+
+                        if types == [TypeNumberRange(1)]:
+                                return
+
+                        if types == [TypeAny()]:
+                                return
+
+                        num_expected = len(self.state.expected_return_type or [])
+
+                        for actual, expected, value in zip(types, self.state.expected_return_type or [], node.values):
+                                if actual != TypeNil() and not expected.convertible_from(actual.denil()):
+                                        self.error(f"return type {actual} not compatible with {expected}", value)
+
+                        if len(types) > num_expected:
+                                self.error("unexpected return value", node.values[num_expected])
+
