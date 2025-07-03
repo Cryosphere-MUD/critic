@@ -156,7 +156,7 @@ for arg in args.objects:
 
 if CHUNKS:
         for chunk in CHUNKS:
-                validate_chunk(chunk)
+                validate_chunk(chunk, return_type=[TypeAny()])
         if got_error:
                 print("there were errors")
                 exit(1)

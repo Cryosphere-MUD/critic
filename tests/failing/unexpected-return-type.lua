@@ -1,1 +1,1 @@
-return "failed"
+return "failed", 1
