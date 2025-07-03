@@ -1,6 +1,7 @@
 from musictypes import TypeString, TypeMudObject, TypeAny, TypeUnionType, TypeSpecificMudObject, TypeNil, TypeUnion, TypeNumberRange, TypeNumber, TypeStringKnownPrefix, TypeTable, TypeZoneTag, TypeTranslatedString, AnyModule
 import json
 from spellcheck import spellcheck
+from events import check_valid_event
 
 def test_ancestor_flag(obj, flag):
         flags = obj.get("flags")
@@ -540,3 +541,23 @@ def global_pairs(self, args):
         return TypeAny(), TypeAny()
 
 
+def global_trap_exec(self, args):
+
+	trap = self.get_type(args[0])
+	for val in trap.strings():
+		event_type = check_valid_event(val)
+		if not event_type:
+			self.error(f"call to unrecognised event {val}", args[0])
+
+		# if event_type is True:
+		# 	return
+
+		# passed_types = self.get_types(args)
+
+		# idx = 1
+
+		# for name, type in event_type.items():
+		# 	if not type.convertible_from(passed_types[idx]):
+		# 		self.error(f"can't convert {passed_types[idx]} to {type}", args[idx])
+		# 	idx += 1
+		

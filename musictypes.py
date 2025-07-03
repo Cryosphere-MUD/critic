@@ -208,11 +208,11 @@ class TypeTable(TypeBase):
                 
 
 class TypeMap(TypeBase):
-	def __init__(self, values):
-		self.values = values
+        def __init__(self, values):
+                self.values = values
 
-	def get_member(self, member_name):
-		return self.values.get(member_name, TypeNil())
+        def get_member(self, member_name):
+                return self.values.get(member_name, TypeNil())
 
 
 class TypeMudObject(TypeBase):
@@ -236,6 +236,9 @@ class TypeMudObject(TypeBase):
 
         def convertible_from(self, source):
                 if type(self) == type(source):
+                        return True
+
+                if isinstance(source, TypeSpecificMudObject):
                         return True
 
                 return super().convertible_from(source)
