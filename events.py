@@ -1,12 +1,37 @@
 import os, sys
 
-from musictypes import TypeString, TypeMudObject, TypeNil, TypeUnion, TypeTable, TypeNumber, TypeBool, TypeAny
+from musictypes import TypeString, TypeMudObject, TypeNil, TypeUnion, TypeTable, TypeNumber, TypeBool, TypeAny, TypeNumberRange
 
 valid_events: dict[str, bool | list[str]] = {}
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from lib import events
+
+def arg_from_type(type):
+        if "|" in type:
+                types = [arg_from_type(part.strip()) for part in type.split("|")]
+                return TypeUnion(*types)
+
+        if type == "int | string":
+                return TypeUnion(TypeString(), TypeNumber())
+        elif type == "string":
+                return TypeString()
+        elif type == "int":
+                return TypeNumber()
+        elif type == "nil":
+                return TypeNil()
+        elif type == "any":
+                return TypeAny()
+        elif type == "bool":
+                return TypeBool()
+        elif type == "mudobject":
+                return TypeMudObject()
+        elif type.isdigit():
+                return TypeNumberRange(int(type))
+        else:
+                print("unknown type!", type)
+                exit(1)
 
 def arg_type(s):
         if s.name == "arg":
@@ -15,22 +40,9 @@ def arg_type(s):
                 type = TypeString(tainted=True)
         elif s.name == "pl":
                 type = TypeMudObject(invoker=True)
-        elif s.type == "int | string":
-                type = TypeUnion(TypeString(), TypeNumber())
-        elif s.type == "string":
-                type = TypeString()
-        elif s.type == "int":
-                type = TypeNumber()
-        elif s.type == "any":
-                type = TypeAny()
-        elif s.type == "bool":
-                type = TypeBool()
-        elif s.type == "mudobject":
-                type = TypeMudObject()
         else:
-                print("unknown type!", s.type)
-                exit(1)
-
+                type = arg_from_type(s.type)
+        
         if s.optional:
                 return TypeUnion(TypeNil(), type)
         
