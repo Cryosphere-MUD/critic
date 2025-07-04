@@ -1,9 +1,13 @@
 from luaparser import ast, astnodes
 from musictypes import TypeModule, TypeAny, TypeFunction, TypeMudObjectOrID, TypeMudObject, TypeNumber, TypeFunctionAny, TypeString, TypeSpecificMudObject, TypeBool, TypeNilString, TypeNil, TypeUnionType, TypeTable, TypeUnion, TypeNumberRange, AnyModule, TypeBase, TypeInvalid, TypeStringKnownPrefix, TypeTranslatedString, TypeMap
 import musictypes
-import functions
 from typing import NamedTuple, Optional
 from scopes import Variable
+
+import functions
+import mudfunctions
+
+FUNCTION_MODULES = [functions, mudfunctions]
 
 def panic(value):
         print("panic")
@@ -1265,10 +1269,11 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor):
                         else:
                                 fn_name = "global_" + function.name + "_wanted_args"
 
-                        if hasattr(functions, fn_name):
-                                fn_impl = getattr(functions, fn_name)
-                                if fn_impl:
-                                        fn_impl(self, wanted_args, real)
+                        for module in FUNCTION_MODULES:
+                                if hasattr(module, fn_name):
+                                        fn_impl = getattr(module, fn_name)
+                                        if fn_impl:
+                                                fn_impl(self, wanted_args, real)
                                         
                 if not function.validate_argcount(len(args)):
                         self.error(f"{function.name} called with {len(args)} arguments")
@@ -1326,13 +1331,14 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor):
                         else:
                                 fn_name = "global_" + symbol.name
 
-                        if hasattr(functions, fn_name):
-                                fn_impl = getattr(functions, fn_name)
-                                if fn_impl:
-                                        rtype = fn_impl(self, args)
-                                        if rtype is None:
-                                                return TypeAny()
-                                        return rtype
+                        for module in FUNCTION_MODULES:
+                                if hasattr(module, fn_name):
+                                        fn_impl = getattr(module, fn_name)
+                                        if fn_impl:
+                                                rtype = fn_impl(self, args)
+                                                if rtype is None:
+                                                        return TypeAny()
+                                                return rtype
                 
                 return symbol.return_type
 
