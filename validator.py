@@ -2,8 +2,8 @@
 
 import sys, typing, argparse
 import glob
-from musictypes import TypeSpecificMudObject, TypeUnion, TypeMudObject, TypeString, TypeAny, TypeTable, TypeMap
 from errors import had_error, set_no_warnings
+from luatypes import TypeAny
 from universe import UNIVERSE, UNIVERSE_BY_ID, TREATAS_USERS
 from worldchecker import check_world
 from chunkvalidate import validate_chunk

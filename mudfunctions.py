@@ -1,4 +1,5 @@
-from musictypes import TypeString, TypeMudObject, TypeAny, TypeUnionType, TypeSpecificMudObject, TypeNil, TypeUnion, TypeNumberRange, TypeNumber, TypeStringKnownPrefix, TypeTable, TypeZoneTag, TypeTranslatedString, AnyModule
+from luatypes import TypeString, TypeAny, TypeUnionType, TypeNil, TypeUnion, TypeNumberRange, TypeNumber, TypeStringKnownPrefix, TypeTable, TypeZoneTag, TypeTranslatedString, AnyModule
+from mudtypes import TypeMudObject, TypeSpecificMudObject
 import json
 from spellcheck import spellcheck
 from events import check_valid_event
@@ -13,7 +14,7 @@ def test_ancestor_flag(obj, flag):
         if not start:
                 return False
 
-        from musictypes import CHECK_MUDOBJECT_ID
+        from mudtypes import CHECK_MUDOBJECT_ID
 
         parent = CHECK_MUDOBJECT_ID(start)
         if parent == True:
@@ -365,7 +366,7 @@ def check_verb(self, obj, verb, parsed = None, node = None, is_full = False):
                 
                 if parsed and len(parsed) > 1:
 
-                        from musictypes import CHECK_MUDOBJECT_ID
+                        from mudtypes import CHECK_MUDOBJECT_ID
                         if not CHECK_MUDOBJECT_ID(parsed[1]):
                                 self.error("takeoff to invalid location", node)
                                 return
@@ -388,7 +389,7 @@ def get_objects_helper(obj_type):
 
         if isinstance(obj_type, TypeString):
                 for v in obj_type.values:
-                        from musictypes import CHECK_MUDOBJECT_ID
+                        from mudtypes import CHECK_MUDOBJECT_ID
                         if found := CHECK_MUDOBJECT_ID(v):
                                 yield TypeSpecificMudObject(found)
 

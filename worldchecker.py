@@ -3,7 +3,8 @@ import typing
 from context import default_context, in_global
 from errors import error, set_filename
 from events import MudEvent, check_valid_event
-from musictypes import TypeMap, TypeSpecificMudObject, TypeUnion, TypeAny
+from luatypes import TypeMap, TypeUnion, TypeAny
+from mudtypes import TypeSpecificMudObject
 from universe import UNIVERSE_BY_ID, TREATAS_USERS
 from chunkvalidate import validate_chunk
 

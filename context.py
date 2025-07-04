@@ -1,4 +1,5 @@
-from musictypes import TypeMudObject, TypeAny, TypeString, TypeTable
+from luatypes import TypeAny, TypeString, TypeTable
+from mudtypes import TypeMudObject
 
 default_context = {"o1": TypeMudObject(),
                                    "o2": TypeAny(),

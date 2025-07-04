@@ -2,7 +2,8 @@
 
 import os, sys
 
-from musictypes import TypeFunction, TypeMudObjectOrID, TypeAny, TypeModule, TypeNumber, TypeString, TypeMudObject, TypeNil, TypeBool, TypeNilString, TypeTable, TypeUnionType, TypeKey, TypeZoneTag, TypeEventName
+from luatypes import TypeFunction, TypeAny, TypeModule, TypeNumber, TypeString, TypeNil, TypeBool, TypeNilString, TypeTable, TypeUnionType, TypeKey, TypeZoneTag, TypeEventName
+from mudtypes import TypeMudObjectOrID, TypeMudObject
 
 module = None
 

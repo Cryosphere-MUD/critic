@@ -1,7 +1,7 @@
 import json
 from types import MappingProxyType
 
-from musictypes import TypeSpecificMudObject
+from mudtypes import TypeSpecificMudObject
 
 with open('../world.json') as world_json:
         UNIVERSE = json.load(world_json)
