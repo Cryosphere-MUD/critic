@@ -3,24 +3,42 @@
 import subprocess
 import os
 import sys
+
+from errors import set_quiet, clear_error, had_error
+from musictypes import TypeAny
 from pathlib import Path
+from chunkvalidate import validate_chunk
 
 def check_files(directory, should_pass):
     failed = False
     for file in sorted(Path(directory).glob("*")):
         if not file.is_file():
             continue
-        result = subprocess.run(
-            ["./validator.py", str(file)],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL
-        )
-        if should_pass and result.returncode != 0:
-            print(f"[FAIL] {file} should have passed but failed.")
-            failed = True
-        elif not should_pass and result.returncode == 0:
-            print(f"[FAIL] {file} should have failed but passed.")
-            failed = True
+
+        opened = open(file, "r")
+        chunk = opened.read()
+
+        file_success = False
+
+        clear_error()
+        set_quiet(True)
+
+        try:
+                validate_chunk(chunk, return_type=[TypeAny()])
+                if had_error():
+                        file_success = False
+                else:
+                        file_success = True
+        except:
+                # import traceback
+                # traceback.print_exc()
+                # print("exception")
+                file_success = False
+
+        if file_success != should_pass:
+                print(file, "should_pass", should_pass, "success", file_success)
+                failed = True
+
     return failed
 
 def main():

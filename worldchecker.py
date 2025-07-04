@@ -101,7 +101,6 @@ def check_world(UNIVERSE_BY_ID, args, ZONE):
 				except:
 					import traceback
 					traceback.print_exc()
-					print("failure in", file)
-					got_error = True
+					error("unknown error")
 					raise
 

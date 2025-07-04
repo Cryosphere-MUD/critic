@@ -3,7 +3,7 @@
 import sys, typing, argparse
 import glob
 from musictypes import TypeSpecificMudObject, TypeUnion, TypeMudObject, TypeString, TypeAny, TypeTable, TypeMap
-from errors import got_error, set_no_warnings
+from errors import had_error, set_no_warnings
 from universe import UNIVERSE, UNIVERSE_BY_ID, TREATAS_USERS
 from worldchecker import check_world
 from chunkvalidate import validate_chunk
@@ -41,7 +41,7 @@ for arg in args.objects:
 if CHUNKS:
         for chunk in CHUNKS:
                 validate_chunk(chunk, return_type=[TypeAny()])
-        if got_error:
+        if had_error():
                 print("there were errors")
                 exit(1)
         else:
@@ -59,5 +59,5 @@ print("Finished validating")
 #sorted_verb_scores = sorted(verb_scores.items(), key=lambda a: a[1], reverse=True)
 #print(sorted_verb_scores)
 
-if got_error:
+if had_error():
         exit(1)
