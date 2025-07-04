@@ -1,6 +1,7 @@
 from luaparser import ast, astnodes
-from musictypes import TypeModule, TypeAny, TypeFunction, TypeMudObjectOrID, TypeMudObject, TypeNumber, TypeFunctionAny, TypeString, TypeSpecificMudObject, TypeBool, TypeNilString, TypeNil, TypeUnionType, TypeTable, TypeUnion, TypeNumberRange, AnyModule, TypeBase, TypeInvalid, TypeStringKnownPrefix, TypeTranslatedString, TypeMap
-import musictypes
+from luatypes import TypeModule, TypeAny, TypeFunction, TypeNumber, TypeFunctionAny, TypeString, TypeBool, TypeNilString, TypeNil, TypeUnionType, TypeTable, TypeUnion, TypeNumberRange, AnyModule, TypeBase, TypeInvalid, TypeStringKnownPrefix, TypeTranslatedString, TypeMap
+from mudtypes import TypeMudObjectOrID, TypeMudObject, TypeSpecificMudObject
+import mudtypes
 from typing import NamedTuple, Optional
 from scopes import Variable
 
@@ -106,7 +107,7 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor):
                 self._universe = universe
                 self._node_types = {}
                 self._narrowings = []
-                musictypes.setValidator(self.check_objectid)
+                mudtypes.setValidator(self.check_objectid)
                 self._return_frames = []
                 self._locked = []
                 self._condition_narrowings = {}

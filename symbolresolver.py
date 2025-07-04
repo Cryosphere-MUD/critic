@@ -1,6 +1,7 @@
 from luaparser import ast, astnodes
 
-from musictypes import TypeAny, TypeMudObject, TypeTable, TypeString
+from luatypes import TypeAny, TypeTable, TypeString
+from mudtypes import TypeMudObject
 
 from scopes import Scope, NodeScopes, Resolutions, Variable
 from typing import Generator

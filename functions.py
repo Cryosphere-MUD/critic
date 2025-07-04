@@ -1,4 +1,4 @@
-from musictypes import TypeString, TypeStringKnownPrefix, TypeUnion, TypeTable, TypeNumberRange, TypeNumber, TypeAny
+from luatypes import TypeString, TypeStringKnownPrefix, TypeUnion, TypeTable, TypeNumberRange, TypeNumber, TypeAny
 
 def global_string_format(self, args):
         fmt = self.get_type(args[0])

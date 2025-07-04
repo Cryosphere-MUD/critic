@@ -1,6 +1,7 @@
 import os, sys
 
-from musictypes import TypeString, TypeMudObject, TypeNil, TypeUnion, TypeTable, TypeNumber, TypeBool, TypeAny, TypeNumberRange
+from luatypes import TypeString, TypeNil, TypeNil, TypeUnion, TypeTable, TypeNumber, TypeBool, TypeAny, TypeNumberRange
+from mudtypes import TypeMudObject
 
 valid_events: dict[str, bool | list[str]] = {}
 

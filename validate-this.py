@@ -5,7 +5,7 @@ import os
 import sys
 
 from errors import set_quiet, clear_error, had_error
-from musictypes import TypeAny
+from luatypes import TypeAny
 from pathlib import Path
 from chunkvalidate import validate_chunk
 

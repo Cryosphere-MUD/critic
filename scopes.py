@@ -1,6 +1,6 @@
 from luaparser import ast, astnodes
 
-from musictypes import TypeBase
+from luatypes import TypeBase
 
 class Scope:
 

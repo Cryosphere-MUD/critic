@@ -1,4 +1,5 @@
-from musictypes import CapitalsModule, TypeNumber, TypeAny, TypeModule, TypeFunction, TypeString, TypeBool, TypeFunctionAny, TypeMudObjectOrID, TypeUnion, TypeNil, TypeTable
+from luatypes import CapitalsModule, TypeNumber, TypeAny, TypeModule, TypeFunction, TypeString, TypeBool, TypeFunctionAny, TypeUnion, TypeNil, TypeTable
+from mudtypes import TypeMudObjectOrID
 
 from universe import valid_quests, valid_minis, valid_sims
 
