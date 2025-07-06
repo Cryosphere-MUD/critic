@@ -25,6 +25,10 @@ def clear_error():
         global got_error
         got_error = False
 
+def set_filename(new_fn):
+	global error_fn
+	error_fn = new_fn
+
 def error(txt, node = None, level = "error", line = None):
         global got_error
         got_error = True

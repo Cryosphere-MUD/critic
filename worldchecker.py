@@ -1,7 +1,7 @@
 import typing
 
 from context import default_context, in_global
-from errors import error
+from errors import error, set_filename
 from events import MudEvent, check_valid_event
 from musictypes import TypeMap, TypeSpecificMudObject, TypeUnion, TypeAny
 from universe import UNIVERSE_BY_ID, TREATAS_USERS
@@ -86,7 +86,7 @@ def check_world(UNIVERSE_BY_ID, args, ZONE):
 
 				chunkpart = key[4:]
 
-				error_fn = itemid + "." + key
+				set_filename(itemid + "." + key)
 
 				context, return_type = get_context_and_return_type(args, item, itemid, key, chunkpart)
 
