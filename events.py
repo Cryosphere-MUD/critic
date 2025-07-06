@@ -25,6 +25,10 @@ def arg_from_type(type):
                 return TypeAny()
         elif type == "bool":
                 return TypeBool()
+        elif type == "objset":
+                return TypeTable(value=TypeMudObject())
+        elif type == "objvec":
+                return TypeTable(value=TypeMudObject())
         elif type == "mudobject":
                 return TypeMudObject()
         elif type.isdigit():
