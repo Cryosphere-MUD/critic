@@ -130,6 +130,8 @@ def make_global_scope(bindings_global):
         global_scope["pressurise"] = TypeFunction(name="pressurise", args=[TypeMudObjectOrID(), TypeAny()], min_args=1)
         global_scope["depressurise"] = TypeFunction(name="depressurise", args=[TypeMudObjectOrID(), TypeAny()], min_args=1)
 
+        global_scope["plural"] = TypeFunction(name="plural", args=[TypeAny()], return_type=TypeBool())
+
         global_scope["error"] = TypeFunction(name="error", args=[TypeString()], min_args=0, no_return=True)
 
         for symbol in GLOBAL_SYMBOLS:
