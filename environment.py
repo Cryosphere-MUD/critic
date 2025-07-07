@@ -3,7 +3,7 @@ from mudtypes import TypeMudObjectOrID
 
 from universe import valid_quests, valid_minis, valid_sims
 
-from mudversion import get_flags_path, get_pflags_path
+from mudversion import get_flags_path, get_pflags_path, is_musicmud
 
 valid_flags = {}
 
@@ -23,9 +23,13 @@ UNCHECKED_MODULES = []
 UNCHECKED_MODULES.append("coroutine")
 UNCHECKED_MODULES.append("trace")
 UNCHECKED_MODULES.append("coroutines")
-UNCHECKED_MODULES.append("json")
+if is_musicmud():
+        UNCHECKED_MODULES.append("json")
 UNCHECKED_MODULES.append("Array")
 UNCHECKED_MODULES.append("attributes")
+
+if is_musicmud():
+        UNCHECKED_MODULES.append("json")
 UNCHECKED_MODULES.append("match") # matcher bitflags
 
 GLOBAL_SYMBOLS = ("pairs", "import", "ipairs", "tonumber", "explode", "loadstring", "clone", "strbyte", 
@@ -76,19 +80,22 @@ def make_global_scope(bindings_global):
 
         global_scope["table"] = MakeTableModule()
 
-        global_scope["priv"] = CapitalsModule(valid_pflags)
-        global_scope["flag"] = CapitalsModule(valid_flags)
+        if is_musicmud():
+                UNCHECKED_MODULES.append("json")
+                global_scope["priv"] = CapitalsModule(valid_pflags)
+                global_scope["flag"] = CapitalsModule(valid_flags)
 
-        global_scope["quest"] = CapitalsModule(valid_quests)
-        global_scope["mini"] = CapitalsModule(valid_minis)
-        global_scope["sim"] = CapitalsModule(valid_sims)
+                global_scope["quest"] = CapitalsModule(valid_quests)
+                global_scope["mini"] = CapitalsModule(valid_minis)
+                global_scope["sim"] = CapitalsModule(valid_sims)
 
-        global_scope["stance"] = CapitalsModule("STANDING", "SITTING", "LYING", "SWIMMING", "FLYING")
+                global_scope["stance"] = CapitalsModule("STANDING", "SITTING", "LYING", "SWIMMING", "FLYING")
 
         for module in UNCHECKED_MODULES:
                 global_scope[module] = TypeAny()
 
-        global_scope["rank"] = CapitalsModule("POfficer", "Crewman", "commander", "Captain", "Commodore")
+        if is_musicmud():
+                global_scope["rank"] = CapitalsModule("POfficer", "Crewman", "commander", "Captain", "Commodore")
         
         global_scope["string"] = TypeModule()
         global_scope["string"].add("len", TypeFunction(name="len", args=[TypeAny()], return_type=TypeNumber()))
@@ -109,15 +116,16 @@ def make_global_scope(bindings_global):
         global_scope["string"].add("match", TypeFunctionAny(name="match"))
         global_scope["string"].add("gmatch", TypeFunctionAny(name="gmatch"))
 
-        global_scope["util"].add("explode", TypeAny())
-        global_scope["util"].add(TypeFunction(name="colour_reverse", args=[TypeString()], return_type=TypeString()))
-        global_scope["util"].add("colour_trim", TypeAny())
-        global_scope["util"].add("formatitime", TypeAny())
+        if is_musicmud():
+                global_scope["util"].add("explode", TypeAny())
+                global_scope["util"].add(TypeFunction(name="colour_reverse", args=[TypeString()], return_type=TypeString()))
+                global_scope["util"].add("colour_trim", TypeAny())
+                global_scope["util"].add("formatitime", TypeAny())
 
-        global_scope["cash"].add("match", TypeAny())
+                global_scope["cash"].add("match", TypeAny())
 
-        global_scope["mud"].add("planet_objects", TypeFunctionAny(name="planet_objects"))
-        global_scope["mud"].add("is_planet", TypeFunctionAny(name="is_planet"))
+                global_scope["mud"].add("planet_objects", TypeFunctionAny(name="planet_objects"))
+                global_scope["mud"].add("is_planet", TypeFunctionAny(name="is_planet"))
 
         global_assert = TypeFunction(name="assert", args=[TypeAny()])
         global_assert.global_assert = True
@@ -129,15 +137,16 @@ def make_global_scope(bindings_global):
 
         global_scope["print"] = global_print
 
-        global_scope["lock"] = TypeFunction(name="lock", args=[TypeMudObjectOrID(), TypeAny()], min_args=1)
-        global_scope["open"] = TypeFunction(name="open", args=[TypeMudObjectOrID(), TypeAny()], min_args=1)
-        global_scope["close"] = TypeFunction(name="close", args=[TypeMudObjectOrID(), TypeAny()], min_args=1)
-        global_scope["pressurise"] = TypeFunction(name="pressurise", args=[TypeMudObjectOrID(), TypeAny()], min_args=1)
-        global_scope["depressurise"] = TypeFunction(name="depressurise", args=[TypeMudObjectOrID(), TypeAny()], min_args=1)
+        if is_musicmud():
+                global_scope["lock"] = TypeFunction(name="lock", args=[TypeMudObjectOrID(), TypeAny()], min_args=1)
+                global_scope["open"] = TypeFunction(name="open", args=[TypeMudObjectOrID(), TypeAny()], min_args=1)
+                global_scope["close"] = TypeFunction(name="close", args=[TypeMudObjectOrID(), TypeAny()], min_args=1)
+                global_scope["pressurise"] = TypeFunction(name="pressurise", args=[TypeMudObjectOrID(), TypeAny()], min_args=1)
+                global_scope["depressurise"] = TypeFunction(name="depressurise", args=[TypeMudObjectOrID(), TypeAny()], min_args=1)
 
-        global_scope["plural"] = TypeFunction(name="plural", args=[TypeAny()], return_type=TypeBool())
+                global_scope["plural"] = TypeFunction(name="plural", args=[TypeAny()], return_type=TypeBool())
 
-        global_scope["error"] = TypeFunction(name="error", args=[TypeString()], min_args=0, no_return=True)
+                global_scope["error"] = TypeFunction(name="error", args=[TypeString()], min_args=0, no_return=True)
 
         for symbol in GLOBAL_SYMBOLS:
                 global_scope[symbol] = TypeFunctionAny(name=symbol)

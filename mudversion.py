@@ -33,3 +33,6 @@ def get_pflags_path():
 
 def has_events():
 	return get_config().get("events")
+
+def is_musicmud():
+        return False
