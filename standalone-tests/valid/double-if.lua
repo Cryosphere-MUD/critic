@@ -1,7 +1,7 @@
 local zch = nil
 local wch = nil
 
-if random(2)>0 then
+if math.random(2)>0 then
   zch = "?"
 end
 
