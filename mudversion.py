@@ -1,18 +1,14 @@
 import json
 
-config = {}
+config = None
 
-config_file = None
-
-def set_config(file):
-	global config_file
-	config_file = file
+config_file = ".critic.config"
 
 def get_config():
 	global config
 	if config_file is None:
 		return {}
-	
+
 	if config is None:
 		with open(config_file) as verbs_json:
 	        	config = json.load(verbs_json)
@@ -35,4 +31,4 @@ def has_events():
 	return get_config().get("events")
 
 def is_musicmud():
-        return False
+        return get_config().get("musicmud")

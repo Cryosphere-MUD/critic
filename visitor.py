@@ -1011,16 +1011,16 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor):
                 self.set_type(node, TypeNumber())
 
         def exit_SubOp(self, node):
-                lhs_num = self.get_type(node.left)
-                rhs_num = self.get_type(node.right)
+                left_type = self.get_type(node.left)
+                right_type = self.get_type(node.right)
 
-                if not TypeNumber().convertible_from(left_type):
-                        self.error(f"not convertible to number", node.left)
-                if not TypeNumber().convertible_from(right_type):
-                        self.error(f"not convertible to number", node.right)
+                # if not TypeNumber().convertible_from(left_type):
+                #         self.error(f"not convertible to number", node.left)
+                # if not TypeNumber().convertible_from(right_type):
+                #         self.error(f"not convertible to number", node.right)
 
-                lhs_num = lhs_num.get_single_number()
-                rhs_num = rhs_num.get_single_number()
+                lhs_num = left_type.get_single_number()
+                rhs_num = right_type.get_single_number()
 
                 if lhs_num is None or rhs_num is None:
                         self.set_type(node, TypeNumber())
@@ -1035,10 +1035,10 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor):
                 lhs_num = self.get_type(node.left)
                 rhs_num = self.get_type(node.right)
 
-                if not TypeNumber().convertible_from(left_type):
-                        self.error(f"not convertible to number", node.left)
-                if not TypeNumber().convertible_from(right_type):
-                        self.error(f"not convertible to number", node.right)
+                # if not TypeNumber().convertible_from(left_type):
+                #         self.error(f"not convertible to number", node.left)
+                # if not TypeNumber().convertible_from(right_type):
+                #         self.error(f"not convertible to number", node.right)
 
                 if (isinstance(left_type, TypeNumberRange) and isinstance(right_type, TypeNumberRange)):
                         self.set_type(node, TypeNumberRange(left_type.min_value + right_type.min_value,

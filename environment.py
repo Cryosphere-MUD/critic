@@ -14,7 +14,7 @@ if flagname := get_flags_path():
 
 valid_pflags = {}
 
-if flagname := get_pflags_path():
+if pflagname := get_pflags_path():
         with open(pflagname, "r") as file:
                 for idx, f in enumerate(file):
                         valid_pflags[f.strip().split(" ")[0].upper()] = TypeNumber(idx + 1)
