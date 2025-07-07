@@ -6,7 +6,7 @@ import sys
 
 from errors import set_quiet, clear_error, had_error
 from luatypes import TypeAny
-from mudversion import set_config
+from mudversion import is_musicmud
 from pathlib import Path
 from chunkvalidate import validate_chunk
 
@@ -45,8 +45,9 @@ def check_files(directory, should_pass):
 def main():
     any_failed = False
 
-    if "--musicmud" in sys.argv:
-        set_config('../.critic.config')
+    if is_musicmud():
+        any_failed |= check_files("musicmud-tests/valid", should_pass=True)
+        any_failed |= check_files("musicmud-tests/failing", should_pass=False)
 
     any_failed |= check_files("standalone-tests/valid", should_pass=True)
     any_failed |= check_files("standalone-tests/failing", should_pass=False)
