@@ -9,7 +9,7 @@ validate: prepare-venv dump-lua validate-lua
 prepare-venv:
 	test -d venv || python3.11 -m venv venv
 	venv/bin/pip install --upgrade pip
-	venv/bin/pip install multimethod antlr4-python3-runtime luapatt phunspell
+	venv/bin/pip install multimethod antlr4-python3-runtime luapatt
 
 dump-lua:
 	make -C ../src musicmud
