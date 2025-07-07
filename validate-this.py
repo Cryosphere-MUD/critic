@@ -36,9 +36,8 @@ def check_files(directory, should_pass):
                 # print("exception")
                 file_success = False
 
-        if file_success == should_pass:
+        if file_success != should_pass:
                 print(file, "should_pass", should_pass, "success", file_success)
-        else:
                 failed = True
 
     return failed
