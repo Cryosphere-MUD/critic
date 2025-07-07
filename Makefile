@@ -1,6 +1,9 @@
 .PHONY: validate prepare-venv dump-lua validate-lua
 
 check:prepare-venv
+	@if [ -f .critic.config ]; then \
+		$(MAKE) dump-lua; \
+	fi
 	ln -sfn py-lua-parser/luaparser .
 	. venv/bin/activate && ./validate-this.py
 
@@ -16,6 +19,9 @@ dump-lua:
 	cd ../ && src/musicmud --dump
 
 validate-lua:
-	ln -sfn ../vendor/py-lua-parser/luaparser .
+	@if [ -f .critic.config ]; then \
+		$(MAKE) dump-lua; \
+	fi
+	ln -sfn py-lua-parser/luaparser .
 	venv/bin/python ./validator.py
 
