@@ -3,11 +3,7 @@ import os, sys
 from luatypes import TypeString, TypeNil, TypeNil, TypeUnion, TypeTable, TypeNumber, TypeBool, TypeAny, TypeNumberRange
 from mudtypes import TypeMudObject
 
-valid_events: dict[str, bool | list[str]] = {}
-
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from lib import events
+from mudversion import has_events
 
 def arg_from_type(type):
         if "|" in type:
@@ -77,18 +73,26 @@ class MudEvent:
         def values(self):
                 yield from self._args.values()
 
-for event in events.parse_events():
-        event_name = event.name
+valid_events: dict[str, bool | list[str]] = {}
 
-        event_args = event.params
+if has_events():
 
-        if event_args is None:
-                valid_events[event_name] = True
-                continue
+        sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-        valid_events[event_name] = MudEvent(event_args, event.return_type)
+        from lib import events
 
-valid_event_prefixes = {"checklist.": True, "lib": True, "verb.": True, "schema": True, "primitives": True, "helpers": True}
+        for event in events.parse_events():
+                event_name = event.name
+
+                event_args = event.params
+
+                if event_args is None:
+                        valid_events[event_name] = True
+                        continue
+
+                valid_events[event_name] = MudEvent(event_args, event.return_type)
+
+        valid_event_prefixes = {"checklist.": True, "lib": True, "verb.": True, "schema": True, "primitives": True, "helpers": True}
 
 
 def check_valid_action(verb):

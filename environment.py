@@ -3,17 +3,21 @@ from mudtypes import TypeMudObjectOrID
 
 from universe import valid_quests, valid_minis, valid_sims
 
+from mudversion import get_flags_path, get_pflags_path
+
 valid_flags = {}
 
-with open("../data/flags", "r") as file:
-        for idx, f in enumerate(file):
-                valid_flags[f.strip().split(" ")[0].upper()] = TypeNumber(idx + 1)
+if flagname := get_flags_path():
+        with open(flagname, "r") as file:
+                for idx, f in enumerate(file):
+                        valid_flags[f.strip().split(" ")[0].upper()] = TypeNumber(idx + 1)
 
 valid_pflags = {}
 
-with open("../data/pflags", "r") as file:
-        for idx, f in enumerate(file):
-                valid_pflags[f.strip().split(" ")[0].upper()] = TypeNumber(idx + 1)
+if flagname := get_pflags_path():
+        with open(pflagname, "r") as file:
+                for idx, f in enumerate(file):
+                        valid_pflags[f.strip().split(" ")[0].upper()] = TypeNumber(idx + 1)
 
 UNCHECKED_MODULES = []
 UNCHECKED_MODULES.append("coroutine")

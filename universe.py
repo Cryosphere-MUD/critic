@@ -2,10 +2,34 @@ import json
 from types import MappingProxyType
 
 from mudtypes import TypeSpecificMudObject
+from mudversion import get_world_path
 
-with open('../world.json') as world_json:
-        UNIVERSE = json.load(world_json)
-        world_json.close()
+def load_universe():
+        with open(get_world_path()) as world_json:
+                UNIVERSE = json.load(world_json)
+                world_json.close()
+
+
+        for obj in UNIVERSE:
+                UNIVERSE_BY_ID[obj.get("id")] = obj
+                #VALID_IDS.append(obj.get("id"))
+
+                if zonetag := obj.get("zone"):
+                        valid_zonetags.add(zonetag)     
+
+                if "Mission" in obj.get("flags"):
+                        valid_quests[obj.get("mname").upper()] = TypeSpecificMudObject(obj)
+
+                if "MiniMission" in obj.get("flags"):
+                        valid_minis[obj.get("mname").upper()] = TypeSpecificMudObject(obj)
+
+                if "Simulation" in obj.get("flags"):
+                        if obj.get("mname"):
+                                valid_sims[obj.get("mname").upper()] = TypeSpecificMudObject(obj)
+
+                if treatas := obj.get("treatas"):
+                        if treatas != obj.get("id"):
+                                TREATAS_USERS.setdefault(treatas, []).append(obj)
 
 valid_quests = {}
 valid_minis = {}
@@ -18,25 +42,9 @@ UNIVERSE_BY_ID["@musicmud"] = dict(id="@musicmud")
 
 TREATAS_USERS = {}
 
-for obj in UNIVERSE:
-        UNIVERSE_BY_ID[obj.get("id")] = obj
-        #VALID_IDS.append(obj.get("id"))
+if get_world_path() is not None:
 
-        if zonetag := obj.get("zone"):
-                valid_zonetags.add(zonetag)     
+        load_universe()
 
-        if "Mission" in obj.get("flags"):
-                valid_quests[obj.get("mname").upper()] = TypeSpecificMudObject(obj)
+        UNIVERSE_BY_ID = MappingProxyType(UNIVERSE_BY_ID)
 
-        if "MiniMission" in obj.get("flags"):
-                valid_minis[obj.get("mname").upper()] = TypeSpecificMudObject(obj)
-
-        if "Simulation" in obj.get("flags"):
-                if obj.get("mname"):
-                        valid_sims[obj.get("mname").upper()] = TypeSpecificMudObject(obj)
-
-        if treatas := obj.get("treatas"):
-                if treatas != obj.get("id"):
-                        TREATAS_USERS.setdefault(treatas, []).append(obj)
-
-UNIVERSE_BY_ID = MappingProxyType(UNIVERSE_BY_ID)

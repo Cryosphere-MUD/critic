@@ -6,7 +6,7 @@ from context import default_context
 from environment import make_global_scope
 from errors import error
 import parents
-from universe import UNIVERSE, UNIVERSE_BY_ID
+from universe import UNIVERSE_BY_ID
 from symbolresolver import resolve_symbols
 from validatorstate import ValidatorState
 from visitor import MusicLUAVisitor

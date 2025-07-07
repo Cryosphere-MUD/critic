@@ -1,0 +1,3 @@
+[submodule "py-lua-parser"]
+	path = py-lua-parser
+	url = https://github.com/boolangery/py-lua-parser

@@ -21,6 +21,10 @@ validate-lua:#libmusicmud.so colour.so
 	ln -sfn ../vendor/py-lua-parser/luaparser .
 	venv/bin/python ./validator.py
 
+check:prepare-venv
+	ln -sfn py-lua-parser/luaparser .
+	. venv/bin/activate && ./validate-this.py
+
 quis-custodiet-ipsos-custodes:prepare-venv dump-lua #libmusicmud.so colour.so 
-	ln -sfn ../vendor/py-lua-parser/luaparser .
+	ln -sfn py-lua-parser/luaparser .
 	. venv/bin/activate && ./validate-this.py
