@@ -45,7 +45,7 @@ def check_files(directory, should_pass):
 def main():
     any_failed = False
 
-    if is_musicmud:
+    if is_musicmud():
         any_failed |= check_files("musicmud-tests/valid", should_pass=True)
         any_failed |= check_files("musicmud-tests/failing", should_pass=False)
 
