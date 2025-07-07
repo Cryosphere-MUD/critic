@@ -2,13 +2,18 @@ from luaparser import ast, astnodes
 from luatypes import TypeModule, TypeAny, TypeFunction, TypeNumber, TypeFunctionAny, TypeString, TypeBool, TypeNilString, TypeNil, TypeUnionType, TypeTable, TypeUnion, TypeNumberRange, AnyModule, TypeBase, TypeInvalid, TypeStringKnownPrefix, TypeTranslatedString, TypeMap
 from mudtypes import TypeMudObjectOrID, TypeMudObject, TypeSpecificMudObject
 import mudtypes
+from mudversion import is_musicmud
 from typing import NamedTuple, Optional
 from scopes import Variable
 
 import functions
-import mudfunctions
 
-FUNCTION_MODULES = [functions, mudfunctions]
+FUNCTION_MODULES = [functions]
+
+if is_musicmud():
+        import mudfunctions
+        FUNCTION_MODULES.append(mudfunctions)
+
 
 def panic(value):
         print("panic")

@@ -49,8 +49,8 @@ def main():
     if "--musicmud" in sys.argv:
         set_config('../.critic.config')
 
-    any_failed |= check_files("tests/valid", should_pass=True)
-    any_failed |= check_files("tests/failing", should_pass=False)
+    any_failed |= check_files("standalone-tests/valid", should_pass=True)
+    any_failed |= check_files("standalone-tests/failing", should_pass=False)
 
     if any_failed:
         print("Some tests failed.")
