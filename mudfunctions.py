@@ -314,6 +314,20 @@ with open('../verbs.json') as verbs_json:
 verb_scores = {}
 
 
+def check_plan(self, obj, plan, node):
+
+        if not obj.check_treatas_field(plan):
+                self.error(f"{obj.id} missing {plan}", node)
+
+        for specific in get_objects(obj):
+                mudobject = obj.mudobject
+                rantcount = mudobject.get("rant.count", 0)
+                for rant in range(rantcount):
+                        rant_text = mudobject.get(f"rant.{rant}")
+                        if "file_plan" in rant_text:
+                                self.error(f"call to file_plan even though a rant.{rant} has a file_plan", node)
+
+
 def check_verb(self, obj, verb, parsed = None, node = None, is_full = False):
         if verb not in VERBS:
                 self.error(f"interpret calls missing verb '{verb}'", node)
@@ -333,9 +347,9 @@ def check_verb(self, obj, verb, parsed = None, node = None, is_full = False):
                         # transient plan assumed to be set by something else
                         # on this object. XXX we could check this
                         return
+                
                 plan = f"plan.{parsed[1]}" if len(parsed) > 1 else "plan"
-                if not obj.check_treatas_field(plan):
-                        self.error(f"{obj.id} missing {plan}", node)
+                check_plan(self, obj, plan, node)
 
                 return
 
@@ -419,8 +433,11 @@ def global_obj_file_plan(self, args):
                 if not isinstance(obj, TypeSpecificMudObject):
                         continue
                 for plan in plans:
-                        if not obj.check_treatas_field(plan):
-                                self.error(f"{obj.id} missing {plan}", args[1])
+                        check_plan(self, obj, plan, args[0])
+
+
+global_obj_file_plan_with_args = global_obj_file_plan
+
 
 def global_obj_interpret_wanted_args(self, wanted, args):
         # it's ok if the player taints their own command line because
