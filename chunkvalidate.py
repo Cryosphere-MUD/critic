@@ -3,7 +3,7 @@ from types import MappingProxyType
 
 from bindings import BINDINGS, MODULE_SYMBOLS, CLASS_METHODS
 from context import default_context
-from environment import make_global_scope
+from globals import make_global_scope
 from errors import error
 import parents
 from universe import UNIVERSE_BY_ID

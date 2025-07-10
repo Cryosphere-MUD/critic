@@ -61,6 +61,25 @@ class TypeAny(TypeBase):
         def convertible_from(self, source):
                 return True
 
+
+class TypeNotNil(TypeBase):
+        def __str__(self):
+                return "notnil"
+
+        def difference(self, _other):
+                return self
+
+        def __eq__(self, other):
+                return type(self) == type(other)
+        
+        def __hash__(self):
+                return hash((type(self)))
+
+        def convertible_from(self, source):
+                if isinstance(source, TypeNil):
+                        return False
+                return True
+
 TypeInvalid = TypeAny
 
 
@@ -88,8 +107,9 @@ class TypeNil(TypeBase):
                 return hash((type(self)))
 
 class TypeModule(TypeBase):
-        def __init__(self, *unchecked):
+        def __init__(self, *unchecked, module=None):
                 self._values = {}
+                self.module = module
                 for n in unchecked:
                         self._values[n] = TypeAny()
 
@@ -101,9 +121,14 @@ class TypeModule(TypeBase):
         
         def add(self, arg1, arg2 = None):
                 if arg2 is None:
-                        self._values[arg1.name] = arg1
+                        name = arg1.name
+                        func = arg1
                 else:
-                        self._values[arg1] = arg2
+                        name = arg1
+                        func = arg2
+                if self.module:
+                        func.module = self.module
+                self._values[name] = func
 
 class SymbolUncheckedModule(TypeBase):
         def contains(self, rhs):
