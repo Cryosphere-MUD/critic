@@ -1,5 +1,3 @@
-.PHONY: validate prepare-venv dump-lua validate-lua
-
 check:prepare-venv
 	@if [ -f .critic.config ]; then \
 		$(MAKE) dump-lua; \
