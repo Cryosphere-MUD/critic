@@ -3,6 +3,7 @@ from mudtypes import TypeMudObject, TypeSpecificMudObject
 import json
 from spellcheck import spellcheck
 from events import check_valid_event
+from extrachunk import add_extra_chunk, ExtraChunk
 
 def test_ancestor_flag(obj, flag):
         flags = obj.get("flags")
@@ -24,6 +25,36 @@ def test_ancestor_flag(obj, flag):
                 return is_abstract(parent)
         
         return None
+
+
+def global_effect_addtimer(self, args):
+	s = self.get_type(args[1])
+	got_any = False
+	for value in s.strings():
+		add_extra_chunk(ExtraChunk(lua=value))
+		got_any = True
+
+	# if not got_any:
+	# 	self.error("unable to fully evaluate executed string here", args[1])
+
+
+def global_effect_spawn_plain(self, args):
+	s = self.get_type(args[4])
+	got_any = False
+	for value in s.strings():
+		add_extra_chunk(ExtraChunk(lua=value))
+		got_any = True
+
+	# if not got_any:
+	# 	self.error("unable to fully evaluate executed string here", args[1])
+
+	s = self.get_type(args[5])
+	got_any = False
+	for value in s.strings():
+		add_extra_chunk(ExtraChunk(lua=value))
+
+	# if not got_any:
+	# 	self.error("unable to fully evaluate executed string here", args[1])
 
 
 def is_abstract(obj):

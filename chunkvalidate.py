@@ -1,15 +1,17 @@
 from luaparser import ast
 from types import MappingProxyType
 
+from mudtypes import TypeMudObject
 from bindings import BINDINGS, MODULE_SYMBOLS, CLASS_METHODS
 from context import default_context
 from globals import make_global_scope
-from errors import error
+from errors import error, got_error
 import parents
 from universe import UNIVERSE_BY_ID
 from symbolresolver import resolve_symbols
 from validatorstate import ValidatorState
 from visitor import MusicLUAVisitor
+from extrachunk import extra_chunks
 
 def validate_chunk(lua, context = None, rewrite_warning_disabled = False, itemid = None, no_detailed = False, return_type = None):
 
@@ -54,3 +56,9 @@ def validate_chunk(lua, context = None, rewrite_warning_disabled = False, itemid
                                     state=state)
         
                 v.visit(tree)
+
+        extra_added = list(extra_chunks)
+        extra_chunks.clear()
+
+        for extra in extra_added:
+                validate_chunk(lua=extra.lua, context=dict(pl=TypeMudObject(), o1=TypeMudObject()))
