@@ -157,6 +157,9 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor):
                 if id.startswith("@skin_"):
                         return True
 
+                if id == "@pl":
+                        return True
+
         def start_return_scope(self, node):
                 self._return_frames.append(FunctionScope(node))
 
@@ -1174,6 +1177,10 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor):
                                 str_value = node.idx.s
                         if isinstance(node.idx, ast.Name):
                                 str_value = node.idx.id
+
+                        if symbol_type.is_invoker and str_value == "id":
+                                self.set_type(node, TypeString("@pl", tainted=False))
+                                return
 
                         self.set_type(node, TypeAny())
 
