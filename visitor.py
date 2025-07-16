@@ -857,6 +857,9 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor):
 
         # no exit_String
 
+        def exit_Dots(self, node):
+                self.set_type(node, TypeAny())
+
         # no enter_Table
 
         def exit_Table(self, node):
