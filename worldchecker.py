@@ -31,12 +31,6 @@ def get_context_and_return_type(args, item, itemid, key, chunkpart):
 		specifics = list(TypeSpecificMudObject(obj) for obj in TREATAS_USERS[itemid])
 		context["o1"] = TypeUnion(*specifics)
 
-	if key.startswith("lua.lib"):
-		return_type = [TypeAny()]
-
-	if key.startswith("lua.verb"):
-		return_type = [TypeAny()]
-
 	context["event"] = TypeMap(context)
 
 	context = {ckey : cvalue for ckey, cvalue in context.items() if in_global(ckey)}
@@ -79,6 +73,9 @@ def check_world(UNIVERSE_BY_ID, args, ZONE):
 
 		for key, value in item.items():
 			if key.startswith("lua."):
+
+				if item.get("critic.ignore." + key):
+					continue
 
 				if value[0] == '>':
 					continue
