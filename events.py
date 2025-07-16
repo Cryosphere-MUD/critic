@@ -26,6 +26,8 @@ def arg_from_type(type):
                 return TypeTable(value=TypeMudObject())
         elif type == "objvec":
                 return TypeTable(value=TypeMudObject())
+        elif type == "table":
+                return TypeTable()
         elif type == "mudobject":
                 return TypeMudObject()
         elif type.isdigit():
@@ -92,8 +94,6 @@ if has_events():
 
                 valid_events[event_name] = MudEvent(event_args, event.return_type)
 
-        valid_event_prefixes = {"checklist.": True, "lib": True, "verb.": True, "schema": True, "primitives": True, "helpers": True}
-
 
 def check_valid_action(verb):
         from functions import VERBS
@@ -107,9 +107,6 @@ def check_valid_event(event):
         if event in valid_events:
                 return valid_events.get(event)
 
-        if any(event.startswith(prefix) for prefix in valid_event_prefixes):
-                return True
-        
         if "." in event:
                 ev = event.split(".")[0] + ".*"
                 if ev in valid_events:
