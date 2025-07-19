@@ -131,7 +131,7 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
                 self._narrowings = []
                 mudtypes.setValidator(self.check_objectid)
                 self._return_frames = []
-                self._locked = []
+                self._locked = {}
                 self._condition_narrowings = {}
                 self.resolution = state.resolutions
                 self._terminating = set()
@@ -176,6 +176,12 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
 
                 if id == "@pl":
                         return True
+                
+        def add_lock(self, node, reason):
+                self._locked.setdefault(id(node), []).append(reason)
+
+        def get_lock(self, node):
+                return self._locked.get(id(node), [])
 
         def start_return_scope(self, node):
                 self._return_frames.append(FunctionScope(node))
@@ -622,9 +628,9 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
 
                                         symbol = self.find_symbol(target)
         
-                                        if symbol in self._locked:
+                                        if lock := self.get_lock(symbol):
                                                 if symbol.the_type != value_type:
-                                                        self.warning(f"rewriting type of {symbol} from {symbol.the_type} to {value_type} after it was used in a function context")
+                                                        self.warning(f"rewriting type of {symbol} from {symbol.the_type} to {value_type} after {lock[0]}")
 
                                         symbol.set_type(value_type)
 
@@ -668,6 +674,9 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
                         iter = self.parent().iter[0]
                         iter_type = self.get_type(iter, get_tuple=True)
 
+                        for target in self.parent().targets:
+                                self.add_lock(self.find_symbol(target), "used as a loop variable")
+
                         if isinstance(iter_type, TypeAny):
                                 for target in self.parent().targets:
                                         self.find_symbol(target).set_type(iter_type)
@@ -690,6 +699,8 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
 
                         if isinstance(start_type, TypeNumberRange) and isinstance(end_type, TypeNumberRange):
                                 number_type = TypeNumberRange(start_type.min_value, end_type.max_value)
+
+                        self.add_lock(loop_var, "used as a loop variable")
 
                         loop_var.set_type(number_type)
 
@@ -720,7 +731,7 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
                 for child in node.body:
                         if self.is_terminating(child):
                                 self.set_terminating(node, True)
-
+                                
                 self._remembered_narrowings[id(node)] = self._narrowings[-1]
                 self._narrowings.pop()
 
@@ -855,7 +866,7 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
 
                                 pass
                         else:
-                                self._locked.append(symbol)
+                                self.add_lock(symbol, "in a function body")
 
                 self._condition_narrowings[id(node)] = [ConditionalNarrowing(symbol, exclude=TypeNil())]
 
