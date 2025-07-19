@@ -86,6 +86,10 @@ def make_global_scope(bindings_global):
 
         global_scope["print"] = global_print
 
+        static_assert = TypeFunction(name="static_assert", args=[TypeAny()])
+        static_assert.is_global = True
+        global_scope["static_assert"] = static_assert
+
         for symbol in GLOBAL_SYMBOLS:
                 global_scope[symbol] = TypeFunctionAny(name=symbol)
                 global_scope[symbol].is_global = True

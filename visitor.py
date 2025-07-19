@@ -41,7 +41,7 @@ class FunctionScope:
                 for idx in range(max_len):
                         l = [r[idx] for r in returns]
                         out.append(TypeUnion(*l))
-                return out
+                return tuple(out)
 
 class ConditionalNarrowing:
 
@@ -261,7 +261,6 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor):
                 if isinstance(the_type, Variable):
                         the_type = the_type.the_type
                 
-                assert(the_type is not None)
                 if isinstance(the_type, tuple):
                         for subtype in the_type:
                                 assert(isinstance(subtype, TypeBase))
@@ -545,7 +544,15 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor):
 
         def exit_LocalAssign(self, node):
 
-                for target, value in zip(node.targets, node.values):
+                assign_values = []
+                for value in node.values:
+                        value_type = self.get_type(value, get_tuple=True)
+                        if isinstance(value_type, tuple):
+                                assign_values.extend(value_type)
+                        else:
+                                assign_values.append(value_type)
+
+                for target, value_type in zip(node.targets, assign_values):
 
                         target_var = self.resolution.get(target)
 
@@ -556,16 +563,11 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor):
                         if target_var.the_type:
                                 self.error("local assign already has type", target)
                                 return
-
-                        value_type = self.get_type(value)
-                        if value_type is None:
-                                self.error(f"not found type of {type(value)}", value)
-                                panic(1)
-
+                        
                         target_var.set_type(value_type)
                         target_var.return_frame = self._return_frames[-1] if self._return_frames else None
 
-                for target in node.targets[len(node.values):]:
+                for target in node.targets[len(assign_values):]:
                         if isinstance(target, astnodes.Name):
                                 target_var = self.resolution.get(target)
                                 target_var.set_type(TypeAny())
@@ -917,11 +919,19 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor):
                         # self._condition_narrowings_for_else[id(node)] = [ConditionalNarrowing(symbol, exclude=only, only=exclude)]
 
         def exit_EqToOp(self, node):
+
                 self.set_type(node, TypeBool())
+
+                left_type = self.get_type(node.left, allow_none=True)
+                right_type = self.get_type(node.right, allow_none=True)
+
+                left_single = left_type.get_single_number()
+                right_single = right_type.get_single_number()
+                if left_single is not None and right_single is not None:
+                        self.set_type(node, TypeBool(left_single == right_single))
 
                 if isinstance(node.left, astnodes.Name):
                         left_symbol = self.find_symbol(node.left)
-                        right_type = self.get_type(node.right, allow_none=True)
 
                         if right_type is None:
                                 return
@@ -996,9 +1006,6 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor):
 
         def exit_ExpoOp(self, node):
                 self.set_type(node, TypeNumber())
-
-        def exit_EqToOp(self, node):
-                self.set_type(node, TypeBool())
 
         def exit_BOrOp(self, node):
                 self.set_type(node, TypeAny())
@@ -1352,7 +1359,7 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor):
                                                 print(f"print() called on {arg} [{arg.the_type}] narrowed to", {arg_type})
                                 elif not quiet:
                                         print(f"print() called on {arg_type}")
-                                return symbol.return_type
+                                return symbol.return_types
 
                         if isinstance(args[0], astnodes.Name):
                                 target = args[0]
@@ -1372,10 +1379,12 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor):
                                         if fn_impl:
                                                 rtype = fn_impl(self, args)
                                                 if rtype is None:
-                                                        return TypeAny()
+                                                        return (TypeAny(), )
+                                                if not isinstance(rtype, tuple):
+                                                        rtype = (rtype, )
                                                 return rtype
                 
-                return symbol.return_type
+                return symbol.return_types
 
         def exit_Call(self, node):
 
@@ -1391,7 +1400,7 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor):
                         returns = self.end_return_scope()
                         self.doing_deferred -= 1
                         return_type = returns.returns_union()
-                        self.set_type(node, return_type[0] if return_type else TypeNil())
+                        self.set_type(node, return_type)
                         symbol.visiting_from_call -= 1
                         return
 
@@ -1415,13 +1424,19 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor):
 
                 self.set_terminating(node, True)
 
-                types = self.get_types(node.values)
+                return_values = []
+                for value in node.values:
+                        value_type = self.get_type(value, get_tuple=True)
+                        if isinstance(value_type, tuple):
+                                return_values.extend(value_type)
+                        else:
+                                return_values.append(value_type)
 
                 if len(self._return_frames):
-                        self._return_frames[-1].add_return(types)
+                        self._return_frames[-1].add_return(return_values)
                 elif not self.doing_deferred:
 
-                        if not types:
+                        if not return_values:
                                 return
                         
                         if self.state.expected_return_type == [TypeNil()]:
@@ -1430,10 +1445,10 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor):
 
                         num_expected = len(self.state.expected_return_type or [])
 
-                        for actual, expected, value in zip(types, self.state.expected_return_type or [], node.values):
+                        for actual, expected, value in zip(return_values, self.state.expected_return_type or [], node.values):
                                 if actual != TypeNil() and not expected.convertible_from(actual.denil()):
                                         self.error(f"return type {actual} not compatible with {expected}", value)
 
-                        if len(types) > num_expected:
+                        if len(return_values) > num_expected:
                                 self.error("unexpected return value", node.values[num_expected])
 
