@@ -1,4 +1,4 @@
-from luatypes import TypeString, TypeAny, TypeUnionType, TypeNil, TypeUnion, TypeNumberRange, TypeNumber, TypeStringKnownPrefix, TypeTable, TypeZoneTag, TypeTranslatedString, AnyModule
+from luatypes import TypeString, TypeAny, TypeUnionType, TypeNil, TypeUnion, TypeNumberRange, TypeNumber, TypeStringKnownPrefix, TypeTable, TypeZoneTag, TypeTranslatedString, AnyModule, TypeStringKnownPrefixType
 from mudtypes import TypeMudObject, TypeSpecificMudObject
 import json
 from spellcheck import spellcheck
@@ -290,7 +290,7 @@ def global_set_wanted_args(self, wanted, args):
 
         # plans shouldn't be tainted
         for s in args[1].types():
-                if isinstance(s, TypeStringKnownPrefix):
+                if isinstance(s, TypeStringKnownPrefixType):
                         if is_plan(s.known_prefix):
                                 was_plan = True
                                 break
@@ -486,7 +486,7 @@ def global_obj_interpret(self, args):
 
         for obj in get_objects(obj_type):
 
-                if isinstance(cmd, TypeStringKnownPrefix):
+                if isinstance(cmd, TypeStringKnownPrefixType):
                         prefix = cmd.known_prefix
                         if " " in prefix:
                                 parsed = prefix.split(" ")

@@ -27,6 +27,21 @@ class FunctionScope:
         def add_return(self, rtypes):
                 self._rtypes.append(rtypes)
 
+        def returns(self):
+                max_len = max(len(rtype) for rtype in self._rtypes) if self._rtypes else 0
+                for type in self._rtypes:
+                        for r in range(len(type), max_len):
+                                type.append(TypeAny())
+                return self._rtypes
+
+        def returns_union(self):
+                returns = self.returns()
+                out = []
+                max_len = max(len(rtype) for rtype in self._rtypes) if self._rtypes else 0
+                for idx in range(max_len):
+                        l = [r[idx] for r in returns]
+                        out.append(TypeUnion(*l))
+                return out
 
 class ConditionalNarrowing:
 
@@ -164,7 +179,7 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor):
                 self._return_frames.append(FunctionScope(node))
 
         def end_return_scope(self):
-                self._return_frames.pop()
+                return self._return_frames.pop()
 
         def error(self, txt, node = None, level="error"):
                 self.state.error(txt, node if node else self.this(), level=level)
@@ -602,7 +617,7 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor):
                                                                 value_type = value_type.difference(eliminated)
 
                                         symbol = self.find_symbol(target)
-
+        
                                         if symbol in self._locked:
                                                 if symbol.the_type != value_type:
                                                         self.warning(f"rewriting type of {symbol} from {symbol.the_type} to {value_type} after it was used in a function context")
@@ -1041,10 +1056,10 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor):
                 lhs_num = self.get_type(node.left)
                 rhs_num = self.get_type(node.right)
 
-                # if not TypeNumber().convertible_from(left_type):
-                #         self.error(f"not convertible to number", node.left)
-                # if not TypeNumber().convertible_from(right_type):
-                #         self.error(f"not convertible to number", node.right)
+                if not TypeNumber().coercible_from(left_type):
+                        self.error(f"{left_type} not convertible to number", node.left)
+                if not TypeNumber().coercible_from(right_type):
+                        self.error(f"{right_type} not convertible to number", node.right)
 
                 if (isinstance(left_type, TypeNumberRange) and isinstance(right_type, TypeNumberRange)):
                         self.set_type(node, TypeNumberRange(left_type.min_value + right_type.min_value,
@@ -1371,10 +1386,14 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor):
                         symbol.deferred_validate = False # avoid recursion
                         self.deferred_validate.remove(symbol)
                         self.doing_deferred += 1
+                        self.start_return_scope(symbol.node)
                         self.visit(symbol.node.body)
+                        returns = self.end_return_scope()
                         self.doing_deferred -= 1
-
+                        return_type = returns.returns_union()
+                        self.set_type(node, return_type[0] if return_type else TypeNil())
                         symbol.visiting_from_call -= 1
+                        return
 
                 if symbol is not None:
 
