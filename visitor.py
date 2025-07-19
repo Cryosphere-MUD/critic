@@ -3,8 +3,10 @@ from luatypes import TypeModule, TypeAny, TypeFunction, TypeNumber, TypeFunction
 from mudtypes import TypeMudObjectOrID, TypeMudObject, TypeSpecificMudObject
 import mudtypes
 from mudversion import is_musicmud
-from typing import NamedTuple, Optional
 from scopes import Variable
+from evalarithmetic import ArithmeticEvaluator
+from evalstring import StringEvaluator
+from evalcomparison import ComparisonEvaluator
 
 import functions
 
@@ -120,7 +122,7 @@ class NarrowingData:
                 return f"[Narrow {s}]"
 
 
-class MusicLUAVisitor(ast.ASTRecursiveVisitor):
+class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvaluator, ComparisonEvaluator):
         def __init__(self, *, universe, state):
                 self.state = state
 
@@ -906,7 +908,14 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor):
 
         def exit_ULNotOp(self, node):
                 self.set_type(node, TypeBool())
+        
                 operand_type = self.get_type(node.operand, allow_none=True)
+                
+                if operand_type == TypeBool(True):
+                        self.set_type(node, TypeBool(False))
+                elif operand_type == TypeBool(False):
+                        self.set_type(node, TypeBool(True))
+
                 if id(node.operand) in self._condition_narrowings:
                         op_conds = self._condition_narrowings.get(id(node.operand))
                         # i think this doesn't extend to more than one because of
@@ -917,38 +926,6 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor):
                         symbol, exclude, only = op_conds[0]
 
                         # self._condition_narrowings_for_else[id(node)] = [ConditionalNarrowing(symbol, exclude=only, only=exclude)]
-
-        def exit_EqToOp(self, node):
-
-                self.set_type(node, TypeBool())
-
-                left_type = self.get_type(node.left, allow_none=True)
-                right_type = self.get_type(node.right, allow_none=True)
-
-                left_single = left_type.get_single_number()
-                right_single = right_type.get_single_number()
-                if left_single is not None and right_single is not None:
-                        self.set_type(node, TypeBool(left_single == right_single))
-
-                if isinstance(node.left, astnodes.Name):
-                        left_symbol = self.find_symbol(node.left)
-
-                        if right_type is None:
-                                return
-                
-                        self._condition_narrowings[id(node)] = [ConditionalNarrowing(left_symbol, only=right_type)]
-
-        def exit_NotEqToOp(self, node):
-                self.set_type(node, TypeBool())
-
-                if isinstance(node.left, astnodes.Name):
-                        left_symbol = self.find_symbol(node.left)
-                        right_type = self.get_type(node.right, allow_none=True)
-
-                        if right_type is None:
-                                return
-
-                        self._condition_narrowings[id(node)] = [ConditionalNarrowing(left_symbol, exclude=right_type)]
 
         def exit_AndLoOp(self, node):
                 hereconds = []
@@ -975,37 +952,13 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor):
                         if items := op_type.items():
                                 self.set_type(node, TypeNumberRange(len(items)))
                                 return
-                self.set_type(node, TypeAny())
+                self.set_type(node, TypeNumber())
 
         def exit_TrueExpr(self, node):
                 self.set_type(node, TypeBool(True))
 
         def exit_FalseExpr(self, node):
                 self.set_type(node, TypeBool(False))
-
-        def exit_GreaterThanOp(self, node):
-                self.set_type(node, TypeBool())
-
-        def exit_GreaterOrEqThanOp(self, node):
-                self.set_type(node, TypeBool())
-
-        def exit_LessOrEqThanOp(self, node):
-                self.set_type(node, TypeBool())
-
-        def exit_LessThanOp(self, node):
-                self.set_type(node, TypeBool())
-
-        def exit_FloatDivOp(self, node):
-                self.set_type(node, TypeNumber())
-
-        def exit_ModOp(self, node):
-                self.set_type(node, TypeNumber())
-
-        def exit_MultOp(self, node):
-                self.set_type(node, TypeNumber())
-
-        def exit_ExpoOp(self, node):
-                self.set_type(node, TypeNumber())
 
         def exit_BOrOp(self, node):
                 self.set_type(node, TypeAny())
@@ -1018,113 +971,6 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor):
                 right_type = self.get_type(node.left)
 
                 self.set_type(node, TypeUnion(left_type, right_type))
-
-        def exit_UMinusOp(self, node):
-
-                # if isinstance(left_type, TypeAny) or isinstance(right_type, TypeAny):
-                #         return
-
-                the_type = self.get_type(node.operand)
-
-                if isinstance(the_type, TypeNumber):
-                        single = the_type.get_single_number()
-                        if single is not None:
-                                self.set_type(node, TypeNumber(-single))
-                                return
-
-                        if isinstance(the_type, TypeNumberRange):
-                                self.set_type(node, TypeNumber(-the_type.max_value, -the_type.min_value))
-                                return
-
-                self.set_type(node, TypeNumber())
-
-        def exit_SubOp(self, node):
-                left_type = self.get_type(node.left)
-                right_type = self.get_type(node.right)
-
-                # if not TypeNumber().convertible_from(left_type):
-                #         self.error(f"not convertible to number", node.left)
-                # if not TypeNumber().convertible_from(right_type):
-                #         self.error(f"not convertible to number", node.right)
-
-                lhs_num = left_type.get_single_number()
-                rhs_num = right_type.get_single_number()
-
-                if lhs_num is None or rhs_num is None:
-                        self.set_type(node, TypeNumber())
-                        return
-
-                self.set_type(node, TypeNumberRange(lhs_num - rhs_num))
-
-        def exit_AddOp(self, node):
-                left_type = self.get_type(node.left)
-                right_type = self.get_type(node.right)
-
-                lhs_num = self.get_type(node.left)
-                rhs_num = self.get_type(node.right)
-
-                if not TypeNumber().coercible_from(left_type):
-                        self.error(f"{left_type} not convertible to number", node.left)
-                if not TypeNumber().coercible_from(right_type):
-                        self.error(f"{right_type} not convertible to number", node.right)
-
-                if (isinstance(left_type, TypeNumberRange) and isinstance(right_type, TypeNumberRange)):
-                        self.set_type(node, TypeNumberRange(left_type.min_value + right_type.min_value,
-                                                      left_type.max_value + right_type.max_value))
-                else:
-                        self.set_type(node, TypeNumber())
-
-        def exit_Concat(self, node):
-                left_type = self.get_type(node.left)
-                right_type = self.get_type(node.right)
-
-                if not TypeString().convertible_from(left_type):
-                        self.error(f"lhs to concat of type {left_type} is not convertible to string", node.left)
-                if not TypeString().convertible_from(right_type):
-                        self.error(f"rhs to concat of type {right_type} is not convertible to string", node.right)
-
-                if isinstance(left_type, TypeTranslatedString):
-                        self.warning("suspicious concat of translated string", node.left)
-
-                if isinstance(right_type, TypeTranslatedString):
-                        self.warning("suspicious concat of translated string", node.right)
-
-                if isinstance(left_type, TypeString) and len(left_type.values)==1:
-                        if isinstance(right_type, TypeString):
-                                if len(right_type.values) == 1:
-                                        res = TypeString(left_type.values[0] + right_type.values[0], tainted=
-                                                         left_type.tainted or right_type.tainted)
-                                        self.set_type(node, res)
-                                        return
-
-                        if isinstance(right_type, TypeNumberRange):
-                                candidates = []
-                                for value in range(right_type.min_value, right_type.max_value+1):
-                                        candidates.append(left_type.values[0] + str(value))
-                                self.set_type(node, TypeString(*candidates, tainted=left_type.tainted))
-                                return
-
-                        tainted = left_type.tainted
-
-                        if isinstance(right_type, TypeString):
-                                tainted |= right_type.tainted
-
-                        self.set_type(node, TypeStringKnownPrefix(left_type.values[0], tainted=tainted))
-                        return
-                
-                if isinstance(left_type, TypeString) and isinstance(right_type, TypeString):
-                        self.set_type(node, TypeString(tainted=False))
-                        return
-
-                if isinstance(left_type, TypeNumber) and isinstance(right_type, TypeString):
-                        self.set_type(node, TypeString(tainted=right_type.tainted))
-                        return
-                
-                if isinstance(right_type, TypeNumber) and isinstance(left_type, TypeString):
-                        self.set_type(node, TypeString(tainted=left_type.tainted))
-                        return
-
-                self.set_type(node, TypeString())
 
         def exit_Index(self, node):
 
