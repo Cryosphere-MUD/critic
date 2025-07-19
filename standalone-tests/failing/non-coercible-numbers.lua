@@ -1,0 +1,1 @@
+local num = 12 + "wstfgl"

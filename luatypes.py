@@ -18,6 +18,9 @@ class TypeBase:
 
                 return False
 
+        def coercible_from(self, source):
+                return self.convertible_from(source)
+
         def difference(self, other):
                 if self == other:
                         return TypeNil()
@@ -254,6 +257,21 @@ class TypeNumber(TypeBase):
 
                 return super().convertible_from(source)
 
+        def coercible_from(self, source):
+
+                if isinstance(source, TypeUnionType):
+                        return all(self.coercible_from(member) for member in source.types())
+
+                for possible in source.strings():
+                        try:
+                                float(possible)
+                        except:
+                                return False
+
+                if isinstance(source, TypeString):
+                        return True
+
+                return self.convertible_from(source)
 
 class TypeNumberRange(TypeNumber):
         def __init__(self, min_value, max_value = None):
@@ -408,14 +426,14 @@ class TypeEventName(TypeConstrainedString):
 
         def test_stringtype_validity(self, source):
                 from events import check_valid_event
-                if isinstance(source, TypeStringKnownPrefix):
+                if isinstance(source, TypeStringKnownPrefixType):
                         # if this is a known prefix string then it presumably ought
                         # to be something like tell.* which will pass this check
                         return check_valid_event(source.known_prefix)
                 return super().test_stringtype_validity(source)
 
 
-class TypeStringKnownPrefix(TypeString):
+class TypeStringKnownPrefixType(TypeString):
         def __init__(self, known_prefix, tainted):
                 self.known_prefix = known_prefix
                 self.tainted = tainted
@@ -430,6 +448,12 @@ class TypeStringKnownPrefix(TypeString):
 
         def __hash__(self):
                 return hash((type(self), tuple(self.known_prefix)))
+
+
+def TypeStringKnownPrefix(known_prefix, tainted):
+        if known_prefix == "":
+                return TypeString(tainted=tainted)
+        return TypeStringKnownPrefixType(known_prefix, tainted)
 
 
 class TypeUnionType(TypeBase):

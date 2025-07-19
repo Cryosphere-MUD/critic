@@ -1,6 +1,5 @@
 local subject = nil
-local mobj = nil
 
-if subject and mud.privs(subject) < mud.minlevel(mobj) then
+if subject and mud.privs(subject) < 12 then
     return
 end

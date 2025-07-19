@@ -93,9 +93,6 @@ class Variable:
                 self.count = uniq
                 uniq += 1
 
-        def __eq__(self, other):
-                return self.name == self.name
-
         def __hash__(self):
                 return hash((type(self), self.name, id(self.scope)))
 
