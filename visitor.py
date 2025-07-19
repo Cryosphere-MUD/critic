@@ -145,6 +145,8 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
                 self.deferred_validate = []
 
                 self.doing_deferred = 0
+                
+                self._loop_iterations = {}
 
         def check_objectid(self, id):
 
@@ -303,6 +305,7 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
                         # if no visitor method found for this arg type,
                         # search in parent arg type:
                         parent_type = node.__class__
+
                         while parent_type != object:
                                 name = "enter_" + parent_type.__name__
                                 tree_visitor = getattr(self, name, None)
@@ -326,8 +329,13 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
                                         children.insert(0, "body")
 
                         for child in children:
-                                self.visit(node.__dict__[child])
-
+                                loop_iterations = self._loop_iterations.get(id(node))
+                                if child == "body" and loop_iterations:
+                                        for n in range(loop_iterations):
+                                                self.visit(node.__dict__[child])
+                                else:
+                                        self.visit(node.__dict__[child])
+                                
                         # call exit node method
                         # if no visitor method found for this arg type,
                         # search in parent arg type:
@@ -699,6 +707,7 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
 
                         if isinstance(start_type, TypeNumberRange) and isinstance(end_type, TypeNumberRange):
                                 number_type = TypeNumberRange(start_type.min_value, end_type.max_value)
+                                self._loop_iterations[id(parent.body)] = number_type.max_value - number_type.min_value + 1
 
                         self.add_lock(loop_var, "used as a loop variable")
 
