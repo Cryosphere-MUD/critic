@@ -1,7 +1,10 @@
 from luaparser import astnodes
 from luatypes import TypeBool, TypeNumber, TypeString, TypeAny
 
+
 def is_comparable(type):
+        if type.is_only(TypeNumber):
+                return True;
         return isinstance(type, (TypeNumber, TypeString, TypeAny))
         
 
