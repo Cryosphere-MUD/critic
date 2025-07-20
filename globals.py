@@ -4,8 +4,8 @@ from mudtypes import TypeMudObjectOrID
 from mudglobals import register_mud_global_scope
 from mudversion import is_musicmud
 
-GLOBAL_SYMBOLS = ("pairs", "ipairs", "tonumber", "explode", "loadstring", "strbyte", 
-                  "tostring", "pcall", "unpack", "next", "xpcall", "load")
+GLOBAL_SYMBOLS = ("pairs", "ipairs", "explode", "loadstring", "strbyte", 
+                  "pcall", "unpack", "next", "xpcall", "load")
 
 def MakeMathModule():
         math = TypeModule("math")
@@ -86,10 +86,14 @@ def make_global_scope(bindings_global):
 
         global_scope["print"] = global_print
 
-        static_assert = TypeFunction(name="static_assert", args=[TypeAny()])
-        static_assert.is_global = True
-        global_scope["static_assert"] = static_assert
+        def register_global(symbol):
+                symbol.is_global = True
+                global_scope[symbol.name] = symbol
 
+        register_global(TypeFunction(name="static_assert", args=[TypeAny()]))
+        register_global(TypeFunction(name="tostring", args=[TypeAny()], return_type=TypeString()))
+        register_global(TypeFunction(name="tonumber", args=[TypeAny()], return_type=TypeNumber()))
+        
         for symbol in GLOBAL_SYMBOLS:
                 global_scope[symbol] = TypeFunctionAny(name=symbol)
                 global_scope[symbol].is_global = True
