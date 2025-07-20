@@ -28,7 +28,7 @@ class ValidatorState:
 
                         extra += "^"
 
-                        for _ in range(node.first_token.start + 1, node.first_token.stop+1):
+                        for _ in range(node.first_token.start + 1, node.last_token.stop+1):
                                 extra += "~"
 
                         line += extra
