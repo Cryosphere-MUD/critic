@@ -1,4 +1,4 @@
-from luatypes import TypeNil, TypeUnion, TypeUnionType, TypeBool
+from luatypes import TypeNil, TypeUnion, TypeUnionType, TypeBool, TypeAny
 
 class LogicEvaluator:
 
@@ -14,6 +14,8 @@ class LogicEvaluator:
                 self.set_type(node, TypeAny())
         
         def enter_AndLoOp(self, node):
+                
+                from visitor import NarrowingData
 
                 self._previous_assumptions[id(node.right)] = node.left
 
