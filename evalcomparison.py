@@ -1,5 +1,9 @@
 from luaparser import astnodes
-from luatypes import TypeBool, TypeNumber
+from luatypes import TypeBool, TypeNumber, TypeString, TypeAny
+
+def is_comparable(type):
+        return isinstance(type, (TypeNumber, TypeString, TypeAny))
+        
 
 class ComparisonEvaluator:
 
@@ -7,19 +11,39 @@ class ComparisonEvaluator:
                 left_type = self.get_type(node.left)
                 right_type = self.get_type(node.right)
 
-                if not TypeNumber().coercible_from(left_type):
-                        self.error(f"{left_type} not convertible to number", node.left)
-                if not TypeNumber().coercible_from(right_type):
-                        self.error(f"{right_type} not convertible to number", node.right)        
+                if not is_comparable(left_type):
+                        self.error(f"{left_type} not convertible to number or string", node.left)
+                if not is_comparable(right_type):
+                        self.error(f"{right_type} not convertible to number or string", node.right)
 
-                lhs_num = left_type.get_single_number()
-                rhs_num = right_type.get_single_number()
+                self.set_type(node, TypeBool())
 
-                if lhs_num is None or rhs_num is None:
-                        self.set_type(node, TypeBool())
-                        return
+                if isinstance(left_type, TypeNumber):
+                        if isinstance(right_type, TypeString):
+                                self.error("comparing number to string!", right_type)
+                                return
+
+                        lhs_num = left_type.get_single_number()
+                        rhs_num = right_type.get_single_number()
+
+                        if lhs_num is None or rhs_num is None:
+                                return
                 
-                self.set_type(node, TypeBool(function(lhs_num, rhs_num)))
+                        self.set_type(node, TypeBool(function(lhs_num, rhs_num)))
+
+                if isinstance(left_type, TypeString):
+                        if isinstance(right_type, TypeNumber):
+                                self.error("comparing number to string!", right_type)
+                                return
+                
+                        lhs_val = left_type.get_single_string()
+                        rhs_val = right_type.get_single_string()
+
+                        if lhs_val is None or rhs_val is None:
+                                return
+                
+                        self.set_type(node, TypeBool(function(lhs_val, rhs_val)))
+
 
 
         def exit_EqToOp(self, node):
