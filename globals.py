@@ -92,7 +92,7 @@ def make_global_scope(bindings_global):
 
         register_global(TypeFunction(name="static_assert", args=[TypeAny()]))
         register_global(TypeFunction(name="tostring", args=[TypeAny()], return_type=TypeString()))
-        register_global(TypeFunction(name="tonumber", args=[TypeAny()], return_type=TypeNumber()))
+        register_global(TypeFunction(name="tonumber", args=[TypeAny()], return_type=TypeUnion(TypeNumber(), TypeNil())))
         
         for symbol in GLOBAL_SYMBOLS:
                 global_scope[symbol] = TypeFunctionAny(name=symbol)
