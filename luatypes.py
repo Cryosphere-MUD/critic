@@ -29,6 +29,9 @@ class TypeBase:
         def get_single_number(self):
                 return None
 
+        def get_single_string(self):
+                return None
+
         def denil(self):
                 return self
 
@@ -337,6 +340,11 @@ class TypeString(TypeBase):
 
         def strings(self):
                 yield from self.values
+
+        def get_single_string(self):
+                if len(self.values) == 1:
+                        return self.values[0]
+                return None
 
         def convertible_from(self, source):
                 if isinstance(source
