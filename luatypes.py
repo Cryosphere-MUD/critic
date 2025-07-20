@@ -21,6 +21,9 @@ class TypeBase:
         def coercible_from(self, source):
                 return self.convertible_from(source)
 
+        def is_only(self, source):
+                return isinstance(self, source)
+
         def difference(self, other):
                 if self == other:
                         return TypeNil()
@@ -484,6 +487,9 @@ class TypeUnionType(TypeBase):
         
         def __str__(self):
                 return " | ".join(str(type) for type in self._types)
+
+        def is_only(self, source):
+                return all(isinstance(member, source) for member in self._types)
 
         def denil(self):
                 denilled = set(filter(lambda f: not isinstance(f, TypeNil), self._types))
