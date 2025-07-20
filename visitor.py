@@ -7,6 +7,7 @@ from scopes import Variable
 from evalarithmetic import ArithmeticEvaluator
 from evalstring import StringEvaluator
 from evalcomparison import ComparisonEvaluator
+from evallogic import LogicEvaluator
 
 import functions
 
@@ -122,7 +123,7 @@ class NarrowingData:
                 return f"[Narrow {s}]"
 
 
-class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvaluator, ComparisonEvaluator):
+class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvaluator, ComparisonEvaluator, LogicEvaluator):
         def __init__(self, *, universe, state):
                 self.state = state
 
@@ -449,7 +450,7 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
 
                 test_type = self.get_type(condition.test)
                 if isinstance(test_type, TypeNumber) and test_type.get_single_number() is None:
-                        self.warning("using number as test (remember that 0 is truthy)", condition)
+                        self.warning("using number as test (remember that 0 is truthy)", condition.test)
 
         # no enter_While
         def exit_While(self,  node):
@@ -917,45 +918,7 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
 
                 self.set_type(node, TypeTable(table, non_numeric=non_numeric))
 
-        def exit_ULNotOp(self, node):
-                self.set_type(node, TypeBool())
-        
-                operand_type = self.get_type(node.operand, allow_none=True)
-                
-                if operand_type == TypeBool(True):
-                        self.set_type(node, TypeBool(False))
-                elif operand_type == TypeBool(False):
-                        self.set_type(node, TypeBool(True))
-
-                if id(node.operand) in self._condition_narrowings:
-                        op_conds = self._condition_narrowings.get(id(node.operand))
-                        # i think this doesn't extend to more than one because of
-                        # DeMorgan's theoreom but I need to check
-                        if len(op_conds) != 1:
-                                return
-
-                        symbol, exclude, only = op_conds[0]
-
-                        # self._condition_narrowings_for_else[id(node)] = [ConditionalNarrowing(symbol, exclude=only, only=exclude)]
-
-        def exit_AndLoOp(self, node):
-                hereconds = []
-                for part in [node.left, node.right]:
-                        if id(part) in self._condition_narrowings:
-                                hereconds.extend(self._condition_narrowings.get(id(part)))
-
-                self._condition_narrowings[id(node)] = hereconds
-
-                self._narrowings.pop()
-                self.set_type(node, TypeAny())
-        
         _previous_assumptions = {}
-
-        def enter_AndLoOp(self, node):
-
-                self._previous_assumptions[id(node.right)] = node.left
-
-                self._narrowings.append(NarrowingData())
 
         def exit_ULengthOP(self, node):
                 op_type = self.get_type(node.operand)
@@ -976,12 +939,6 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
 
         def exit_BAndOp(self, node):
                 self.set_type(node, TypeAny())
-
-        def exit_OrLoOp(self, node):
-                left_type = self.get_type(node.left)
-                right_type = self.get_type(node.left)
-
-                self.set_type(node, TypeUnion(left_type, right_type))
 
         def exit_Index(self, node):
 
