@@ -1,6 +1,7 @@
 from luaparser import ast, astnodes
 from luatypes import TypeModule, TypeAny, TypeFunction, TypeNumber, TypeFunctionAny, TypeString, TypeBool, TypeNilString, TypeNil, TypeUnionType, TypeTable, TypeUnion, TypeNumberRange, AnyModule, TypeBase, TypeInvalid, TypeStringKnownPrefix, TypeTranslatedString, TypeMap
 from mudtypes import TypeMudObjectOrID, TypeMudObject, TypeSpecificMudObject
+from tabletypes import TypeStruct
 import mudtypes
 from mudversion import is_musicmud
 from scopes import Variable
@@ -124,7 +125,7 @@ class NarrowingData:
 
 
 class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvaluator, ComparisonEvaluator, LogicEvaluator):
-    def __init__(self, *, universe, state):
+        def __init__(self, *, universe, state):
             self.state = state
 
             self._universe = universe
@@ -147,7 +148,7 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
 
             self.doing_deferred = 0
 
-    def check_objectid(self, id):
+        def check_objectid(self, id):
 
             if id in self._universe:
                     return self._universe.get(id)
@@ -954,9 +955,9 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
 
                         if isinstance(node.value.value, astnodes.Name):
                                 inner_symbol_type = self.get_type(node.value.value)
-                                if isinstance(inner_symbol_type, TypeMudObject):
+                                if isinstance(inner_symbol_type, (TypeMudObject, TypeStruct)):
                                         str_value = node.value.idx.id + "." + node.idx.id
-                
+
                         self.set_type(node, TypeAny())
 
                         if str_value:
@@ -1010,7 +1011,8 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
                                                 self.set_type(node, TypeAny())
                                                 return
 
-                if isinstance(symbol_type, (TypeSpecificMudObject, TypeMudObject)):
+                if isinstance(symbol_type, (TypeSpecificMudObject, TypeMudObject, TypeStruct)):
+
                         str_value = None
                         if isinstance(node.idx, ast.String):
                                 str_value = node.idx.s
@@ -1027,7 +1029,8 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
                                 if field_type := symbol_type.check_field(str_value):
                                         self.set_type(node, field_type)
                                 else:
-                                        # self.warning(f"unknown field {str_value} on {symbol_type.id}")
+                                        if symbol_type.missing_field_is_error:
+                                                self.warning(f"unknown field {str_value} on {symbol_type.id}")
                                         # these actually come out as Nil if they're not defined
                                         self.set_type(node, TypeAny())
 

@@ -3,7 +3,7 @@ from types import MappingProxyType
 
 from mudtypes import TypeMudObject
 from bindings import BINDINGS, MODULE_SYMBOLS, CLASS_METHODS
-from context import default_context
+from context import get_default_context
 from globals import make_global_scope
 from errors import error, got_error
 import parents
@@ -16,7 +16,7 @@ from extrachunk import extra_chunks
 def validate_chunk(lua, context = None, rewrite_warning_disabled = False, itemid = None, no_detailed = False, return_type = None):
 
         if context is None:
-                context = dict(default_context)
+                context = get_default_context()
 
         global errored_nodes
         errored_nodes = set()

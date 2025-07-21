@@ -1,0 +1,38 @@
+struct ch {
+        string roomkey;
+        string name;
+}
+
+struct obj {
+}
+
+struct room {
+}
+
+type objkey = string;
+
+type room_or_key = room | string;
+
+bool carries(ch obj)
+bool canseechar(ch a, ch b)
+void say(string text)
+bool carries(ch ch, string txt)
+void purgeobj(obj | "all" ob, int options:0)
+
+# union ch | "self"
+
+void purgemob(ch | string" CH, int options:0)
+void echo(string text)
+void rgoto(string room_key)
+bool mobexists(string loc, room room)
+bool objhere(string loc)
+void give(obj ob, ch ch)
+
+# any here seems to be union ch | "all"
+
+void transfer(ch | "all" ch, room_or_key loc, int options:0)
+void mdo(string command)
+void purgeoj(string type)
+void social(string social, ch target:0)
+void destroy(object ch, objkey target)
+obj oload(string load, int count:0, string key:0)

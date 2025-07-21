@@ -1,5 +1,5 @@
 local roomkey   = self.roomkey
-chname = ch.name
+local chname = ch.name
 if (roomkey == "legend-41") then
    say ("Welcome aboard!")
    say ("Heres your equipment. Hop to it, pal.")

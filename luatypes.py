@@ -206,6 +206,7 @@ class TypeTable(TypeBase):
                 self.non_numeric = non_numeric
                 self.key = key
                 self.value = value
+                self.missing_field_is_error = False
 
         def items(self):
                 if self._table is None:
