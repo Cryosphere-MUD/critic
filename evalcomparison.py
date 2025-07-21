@@ -23,7 +23,7 @@ class ComparisonEvaluator:
 
                 if isinstance(left_type, TypeNumber):
                         if isinstance(right_type, TypeString):
-                                self.error("comparing number to string!", right_type)
+                                self.error("comparing number to string!", node.right)
                                 return
 
                         lhs_num = left_type.get_single_number()
@@ -36,7 +36,7 @@ class ComparisonEvaluator:
 
                 if isinstance(left_type, TypeString):
                         if isinstance(right_type, TypeNumber):
-                                self.error("comparing number to string!", right_type)
+                                self.error("comparing number to string!", node.right)
                                 return
                 
                         lhs_val = left_type.get_single_string()
