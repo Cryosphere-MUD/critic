@@ -1,4 +1,4 @@
-from luatypes import TypeBool, TypeString, TypeStringKnownPrefix, TypeUnion, TypeTable, TypeNumberRange, TypeNumber, TypeAny, TypeStringKnownPrefixType
+from luatypes import TypeBool, TypeString, TypeStringKnownPrefix, TypeUnion, TypeTable, TypeNumberRange, TypeNumber, TypeAny, TypeStringKnownPrefixType, TypeNil, TypeUnionType
 
 
 def global_static_assert(self, args):
@@ -53,3 +53,11 @@ def global_pairs(self, args):
 	return TypeAny(), TypeAny()
 
 
+
+def global_tonumber(self, args):
+	typ = self.get_type(args[0])
+	if typ.get_single_number():
+		return TypeNumber()
+
+	return TypeUnion(TypeNil(), TypeNumber())
+	
