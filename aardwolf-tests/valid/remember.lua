@@ -1,4 +1,4 @@
-targ = self.target
+local targ = self.target -- changed to local as critic dislikes globals
 
 if targ == nil then
    say ("I don't have a target")

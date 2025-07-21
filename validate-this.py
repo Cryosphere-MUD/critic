@@ -45,8 +45,8 @@ def check_files(directory, should_pass):
 def main():
     any_failed = False
 
-    if is_aardmud():
-        any_failed |= check_files("aardwolf-tests/valid", should_pass=True)
+    any_failed |= check_files("aardwolf-tests/valid", should_pass=True)
+    any_failed |= check_files("aardwolf-tests/failing", should_pass=False)
 
     if is_musicmud():
         any_failed |= check_files("musicmud-tests/valid", should_pass=True)

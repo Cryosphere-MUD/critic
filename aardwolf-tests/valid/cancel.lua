@@ -7,15 +7,16 @@ if not(hasdelay()) then
 end
 
 --- In the delay prog.
-targ = self.target
-if (targ == nil) {
+local targ = self.target -- changed to local because critic by forbids global assigns
+if (targ == nil) then --- changed from C function syntax
    --- Target left, how rude.
    social("mutter")
-} else {
+else
    say("His lordship will meet you now " .. targ.name);
    mdo("unlock gate");
    mdo("open gate");
-}
+end
+
 --- forget existing target.
 forget()
 

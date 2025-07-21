@@ -72,6 +72,3 @@ def register_mud_global_scope(global_scope):
                 global_scope[symbol].is_global = True
 
 
-def register_aardmud_global_scope(global_scope):
-        for symbol in ("LP_SEEALL", "LP_CARRIEDONLY", "LP_PLRONLY", "LP_ALLMOBS", "LP_ALLOBJS"):
-                global_scope[symbol] = TypeAny()

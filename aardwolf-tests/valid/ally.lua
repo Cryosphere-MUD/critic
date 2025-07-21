@@ -3,5 +3,5 @@
     say ("Hi " .. ch.name .. "! Please help defend us!")
  else 
     say ("Go away mean old raider!")
-    killsee(ch)
+    kill(ch) -- ABI: KILLSEE not documented, changed to kill???
  end

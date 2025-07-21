@@ -2,7 +2,7 @@
 
 import os, sys
 
-from luatypes import TypeFunction, TypeAny, TypeModule, TypeNumber, TypeString, TypeNil, TypeBool, TypeNilString, TypeTable, TypeUnionType, TypeKey, TypeZoneTag, TypeEventName, TypeUnion
+from luatypes import TypeFunction, TypeAny, TypeModule, TypeNumber, TypeString, TypeNil, TypeBool, TypeNilString, TypeTable, TypeUnionType, TypeKey, TypeZoneTag, TypeEventName, TypeUnion, TypeNumberRange
 from mudtypes import TypeMudObjectOrID, TypeMudObject
 from tabletypes import TypeStruct
 
@@ -14,12 +14,16 @@ def set_module(module_id):
 
 
 basic_types = {
-        "eventname": TypeEventName
+        "eventname": TypeEventName,
+        "nil": TypeNil
 }
 
 
 
 struct_types = {
+}
+
+global_symbols = {
 }
 
 
@@ -38,6 +42,10 @@ def conv_type(argtype, isarg = False):
         
         if len(argtype) > 1 and argtype[0] == '\"' and argtype[-1] == '\"':
                 return TypeString(argtype[1:-1])
+        
+        if argtype.isnumeric():
+                num = int(argtype)
+                return TypeNumberRange(num, num)
 
         if struct := struct_types.get(argtype):
                 return struct
@@ -206,11 +214,21 @@ def parse_bindings(file):
                         type, field = l.rsplit(" ", 1)
                         fields[field] = conv_type(type, False)
                 name = name.strip()
-                struct_types[name] = TypeStruct(name, fields)
+
+                if name in struct_types:
+                        struct_types[name].fields = fields
+                else:
+                        struct_types[name] = TypeStruct(name, fields)
 
         def handle_type_defn(arg):
                 name, defn = arg.split("=")
-                struct_types[name.strip()] = conv_type(defn.strip(), True)
+                struct_types[name.strip()] = conv_type(defn.strip(), False)
+
+        def handle_global(arg):
+                if arg[-1] == ";":
+                        arg = arg[:-1]
+                type, name = arg.rsplit(" ", 1)
+                global_symbols[name.strip()] = conv_type(type.strip(), False)
 
         incpp = False
         defining_struct = None
@@ -247,12 +265,19 @@ def parse_bindings(file):
                                 continue
 
                         if line[0:7] == "struct ":
-                                defining_struct = line[7:].split("{")[0]
-                                struct_defn = ""
+                                if "{" in line:
+                                        defining_struct = line[7:].split("{")[0]
+                                        struct_defn = ""
+                                else:
+                                        handle_struct_defn(line[7:], "")
                                 continue
 
                         if line[0:5] == "type ":
                                 handle_type_defn(line[5:])
+                                continue
+
+                        if line[0:7] == "global ":
+                                handle_global(line[7:])
                                 continue
 
                         if "=" in line:

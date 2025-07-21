@@ -1,17 +1,11 @@
 from luatypes import TypeAny, TypeString, TypeTable
 from mudtypes import TypeMudObject
-from mudversion import is_aardmud
-from bindingsparser import struct_types
+from bindingsparser import struct_types, global_symbols
 
 def get_default_context():
-        if is_aardmud:
-                return {"ch": struct_types.get("ch"),
-                           "self": struct_types.get("ch"),
-                           "obj": struct_types.get("obj"),
-                           "room": struct_types.get("room"),
-                           "mud": struct_types.get("mud")
-                           }
-                
+        if global_symbols:
+                return global_symbols
+
         return {"o1": TypeMudObject(),
                 "o2": TypeAny(),
                 "o3": TypeAny(),

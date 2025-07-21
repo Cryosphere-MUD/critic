@@ -4,7 +4,9 @@ if mobexists("badtrip-99",getroom("aylor-0")) then
 end
 
 --- Is there a guard right here?
-if mobexists("aylor-30",room) then ...
+if mobexists("aylor-30",room) then
+end
 
 --- Is there one in the game at all?
-if mobexists("aylor-30") then ...
+if mobexists("aylor-30") then 
+end

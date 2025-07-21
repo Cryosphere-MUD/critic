@@ -14,7 +14,7 @@ local statue = getobj("test-2",room,0)
 if statue ~= nil then
    --- Is the gem inside it?
    local gem = getobj("test-3",statue,0)
-   if gem ~- nil then
+   if gem ~= nil then -- corrected from ~- 
       --- The gem is here ... do something.
    end
 end

@@ -1,0 +1,2 @@
+local blah = ally(room)
+

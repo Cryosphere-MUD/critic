@@ -1,38 +1,142 @@
+struct ch
+struct room
+
 struct ch {
-        string roomkey;
-        string name;
+        string roomkey
+        room room
+        string name
+        int level
+        int int
+        int gid
+        ch target
 }
 
 struct obj {
+        string name
+        int level
+        string keywords
+        ch owner
+        string typestr
+        int value
+        int weight
 }
 
 struct room {
+        string key
+        string name
 }
 
-type objkey = string;
+struct mud {
+        int hour
+        string season
+}
 
-type room_or_key = room | string;
+global int LP_ACTIVEONLY
+global int LP_ALLOBJS
+global int LP_ALLMOBS
+global int LP_CARRIEDONLY
+global int LP_CAPS
+global int LP_GROUP
+global int LP_MOBONLY
+global int LP_NOIMM
+global int LP_PLRONLY
+global int LP_ONEONLY
+global int LP_ROOMONLY
+global int LP_SEEALL
+global int LP_ZONEONLY
 
-bool carries(ch obj)
+global int FOCUS_ACID
+global int FOCUS_BASH
+global int FOCUS_COLD
+global int FOCUS_FIRE
+
+type objkey = string
+type mobkey = string
+type roomkey = string
+type statkey = string
+
+type affliction = "flying" | "diseased" | "sanctuary"
+
+type objtype = "weapon"
+
+type damagetype = "fire" | "acid"
+
+type mobflag = "nodamage"
+
+type objflag = "hum" | "rot-death"
+
+type playerflag = "traitor"
+
+type room_or_key = room | string
+
+type optch = ch | nil
+
+global ch ch
+global ch self
+global obj obj
+global room room
+global mud mud
+
+void adddelay(int delay)
+bool addpet(ch who, ch newpet)
+void addstats(obj target, statkey stat, int amount)
+bool affected(ch who, affliction flag)
+bool ally(ch who)
+void call(string prodig, any varargs)
+void cancel()
 bool canseechar(ch a, ch b)
-void say(string text)
+void cast(string spelltype, ch | obj | "all" | string target, int options:0)
 bool carries(ch ch, string txt)
-void purgeobj(obj | "all" ob, int options:0)
-
-# union ch | "self"
-
-void purgemob(ch | string" CH, int options:0)
-void echo(string text)
-void rgoto(string room_key)
-bool mobexists(string loc, room room)
-bool objhere(string loc)
-void give(obj ob, ch ch)
-
-# any here seems to be union ch | "all"
-
-void transfer(ch | "all" ch, room_or_key loc, int options:0)
+# overloading type behaviour can be implemented with a definition in functions.py
+bool channel(ch ch, string channel, "on"|"off" status:0)
+bool config(ch ch, string flag)
+int countitems(ch ch, objkey obj, int options:0)
+int countchars(roomkey room, int options:0)
+void damage(ch ch, int min, int max, int options:0)
+void destroy(object ch, objkey target, int options:0)
+# needs a functions.py stub?
+void doat(any varargs)
+void echo(string text, ch about:0, int options:0)
+void echoat(ch ch, string text, int options:0)
+void force(ch | mobkey | string | "all" actor, string commands, int options:0)
+void forget()
+optch getpet(ch ch)
+table getchars(roomkey room, int options:0)
+ch getmob(roomkey | string target, roomkey | room | nil room:0, int options:0)
+obj getobj(objkey target, roomkey | room | ch | obj | nil room:0, int options:0)
+room getroom(roomkey room)
+# give needs overloading/a stub in functions.py
+void give(any varargs)
+bool hasobj(ch ch, objtype type)
+bool hasdelay()
+void kill(ch ch, int options:0)
 void mdo(string command)
-void purgeoj(string type)
-void social(string social, ch target:0)
-void destroy(object ch, objkey target)
-obj oload(string load, int count:0, string key:0)
+ch mload(mobkey string, room dest:0)
+bool immune(ch ch, damagetype damagetype, "on" | "off" new:0)
+void info(string text, string category)
+bool isplayer(ch ch)
+bool mobexists(string loc, room room:0)
+bool mobflag(ch ch, mobflag flag)
+void movechar(ch ch, room_or_key dest)
+bool objflag(obj ob, objflag flag, 0 | 1 new:0)
+bool objhere(string loc)
+# needs overloading again
+any objresists(obj ob, int focus, int modify:0)
+obj oload(string load, int count:0, string key:0, ch targ:0)
+void peace()
+void pgoto(string playername)
+void plrflag(ch ch, playerflag flag)
+void postnote(string board, string dest, string subject, string body, int days:0)
+void purgeobj(obj | objkey ob, int options:0)
+void purgemob(ch | string CH, int options:0)
+void rgoto(string room_key)
+optch randchar(int options, room room:0)
+void remember(ch ch)
+void rgoto(room_or_key room)
+void say(string text)
+void sayto(ch ch, string text, int options:0)
+void send(ch target, string message)
+void social(string social, ch|string target:0)
+void transfer(ch | "all" ch, room_or_key loc, int options:0)
+bool wearsobj(ch ch, objtype type)
+void summon(ch| string target, int options:0)

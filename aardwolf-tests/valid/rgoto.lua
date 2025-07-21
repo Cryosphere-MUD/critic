@@ -3,5 +3,5 @@
 --- use 'doat' if it was converted yet :)
  local chroom = ch.room
  rgoto("aylor-0")
- purge("guard")
+ purgemob("guard") -- XXX
  rgoto(chroom)

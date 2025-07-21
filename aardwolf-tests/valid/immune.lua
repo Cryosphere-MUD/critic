@@ -1,5 +1,5 @@
 --- switch weapons if target immune.
-if immune(ch,"fire")) then
+if immune(ch,"fire") then -- removed extra )
    mdo("wield ice blade")
 end
 

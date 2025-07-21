@@ -1,5 +1,5 @@
 --- Return number of resistances the item has in fire:
-say("Fire resistance on this item is: " .. objresists(obj,FOCUS_FIRE)
+say("Fire resistance on this item is: " .. objresists(obj,FOCUS_FIRE)) -- missing )
 
 --- Increase the number of resistances in Acid by 3
 objresists(obj,FOCUS_ACID,3)
