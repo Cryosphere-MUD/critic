@@ -1,8 +1,8 @@
 from luatypes import CapitalsModule, TypeNumber, TypeAny, TypeModule, TypeFunction, TypeString, TypeBool, TypeFunctionAny, TypeUnion, TypeNil, TypeTable, TypeNotNil
 from mudtypes import TypeMudObjectOrID
 
-from mudglobals import register_mud_global_scope
-from mudversion import is_musicmud
+from mudglobals import register_mud_global_scope, register_aardmud_global_scope
+from mudversion import is_musicmud, is_aardmud
 
 GLOBAL_SYMBOLS = ("pairs", "ipairs", "explode", "loadstring", "strbyte", 
                   "pcall", "unpack", "next", "xpcall", "load")
@@ -75,6 +75,9 @@ def make_global_scope(bindings_global):
 
         if is_musicmud():
                 register_mud_global_scope(global_scope)
+
+        if is_aardmud():
+                register_aardmud_global_scope(global_scope)
 
         global_assert = TypeFunction(name="assert", args=[TypeAny()])
         global_assert.global_assert = True

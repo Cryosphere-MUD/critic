@@ -6,7 +6,7 @@ import sys
 
 from errors import set_quiet, clear_error, had_error
 from luatypes import TypeAny
-from mudversion import is_musicmud
+from mudversion import is_musicmud, is_aardmud
 from pathlib import Path
 from chunkvalidate import validate_chunk
 
@@ -44,6 +44,9 @@ def check_files(directory, should_pass):
 
 def main():
     any_failed = False
+
+    if is_aardmud():
+        any_failed |= check_files("aardwolf-tests/valid", should_pass=True)
 
     if is_musicmud():
         any_failed |= check_files("musicmud-tests/valid", should_pass=True)

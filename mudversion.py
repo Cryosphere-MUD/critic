@@ -35,3 +35,6 @@ def has_events():
 
 def is_musicmud():
         return get_config().get("musicmud")
+
+def is_aardmud():
+        return get_config().get("aardmud")
