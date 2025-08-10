@@ -584,6 +584,7 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
         # no enter_Assign
 
         def exit_Assign(self, node):
+
                 if len(node.targets) > 1 and len(node.values) == 1:
                         for target in node.targets:
                                 if isinstance(target, astnodes.Name):
@@ -594,10 +595,11 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
                                                 exit(1)
                                         symbol.set_type(TypeAny())
 
-
                 for target, value in zip(node.targets, node.values):
                         if isinstance(target, astnodes.Name):
+
                                 symbol = self.find_symbol(target)
+
                                 value_type = self.get_type(value)
                                 new_value_type = value_type
 
@@ -611,24 +613,24 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
                                 if isinstance(node, astnodes.LocalAssign):
                                         self.add_to_scope(target.id, value_type)
                                 else:
+                                        if symbol.read_only:
+                                                self.error(f"assignment to read-only symbol {symbol}", node)
 
                                         # chunk, block, list, if
                                         if (self.match_stack(list, astnodes.Block, astnodes.If,
                                                              list, astnodes.Block, astnodes.Chunk)
                                             and self.visit_stack(-4).body is self.visit_stack(-3)):
-                                                    
+
                                                     test = self.visit_stack(-4).test
                                                     if (isinstance(test, astnodes.EqToOp) and
                                                         isinstance(test.left, astnodes.Name)):
-                                                        
+
                                                             var = self.find_symbol(test.left)
 
                                                             if var.the_type == old_type:
                                                                 eliminated = self.get_type(test.right)
                                                                 value_type = value_type.difference(eliminated)
 
-                                        symbol = self.find_symbol(target)
-        
                                         if lock := self.get_lock(symbol):
                                                 if symbol.the_type != value_type:
                                                         self.warning(f"rewriting type of {symbol} from {symbol.the_type} to {value_type} after {lock[0]}")
@@ -636,6 +638,21 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
                                         symbol.set_type(value_type)
 
                                         self._narrowings[-1].add_narrowing(symbol, new_value_type)
+
+                        elif isinstance(target, astnodes.Index):
+
+                                table_type = self.get_type(target.value)
+
+                                for type in table_type.types():
+
+                                        if isinstance(type, (TypeTable, TypeMudObject, TypeAny)):
+                                                pass
+
+                                        else:
+                                                self.error(f"indexing of {type} for assign", node)
+
+                        else:
+                                self.error(f"assign to unexpected AST node", node)
 
         def enter_AnonymousFunction(self, node):
                 self.start_return_scope(node)
@@ -1000,7 +1017,7 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
                                 if node.notation == ast.IndexNotation.SQUARE:
                                         if isinstance(node.idx, astnodes.String):
                                                 if not symbol_type.contains(node.idx.s):
-                                                        self.error(f"unrecognised {symbol.name}.{node.s.id}")
+                                                        self.error(f"unrecognised {symbol.name}.{node.idx.s}")
                                                         exit(1)
                                                 self.set_type(node, symbol_type.lookup(node.idx.s))
                                                 return
