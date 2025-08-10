@@ -1,12 +1,10 @@
-local midrope = nil
-local pl
-local o1
+local ql = nil
 
 if o1.blah then
-  midrope=make.clone(get("defence_rope_2"), owner(o1))
-  setstate(midrope,2)
-  set(midrope,"!grapple",getstr(o1,"id"))
-  set(o1,"!midrope",getstr(midrope,"id"))
+  ql=make.clone(get("template_bag_1"), owner(o1))
+  setstate(ql,2)
+  set(ql,"!prop",getstr(o1,"id"))
+  set(o1,"!ql",getstr(ql,"id"))
 end
 
-midrope:send("blah")
+ql:send("blah")
