@@ -1,20 +1,20 @@
-local simfunc = function(aobj, dobj, rounds, notify_inc)
-  local tally = {}
+local func = function(a, b, c, d)
+  local dict = {}
 
-  local showstats = function(forwho)
-	local r = tally[forwho].deaths
+  local showstats = function(e)
+	local r = dict[e].prop
   end
 
-  showstats(aobj)
+  showstats(a)
 
-  return tally
+  return dict
 end
 
-if arg[1] == "evaluate" then
+if arg[1] == "str" then
 
   local opts = ""
   opts = opts.."a"
 
 else
-  simfunc()
+  func()
 end

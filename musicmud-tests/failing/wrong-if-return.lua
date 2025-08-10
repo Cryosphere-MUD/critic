@@ -1,6 +1,6 @@
 local out = nil
 local out2 = nil
-local o2 = get("level2_1")
+local o2 = get("level1_1")
 local r = random(3)
 
 if r == 0 then
