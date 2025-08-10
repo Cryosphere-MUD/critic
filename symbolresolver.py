@@ -37,8 +37,9 @@ def resolve_symbols(tree, state):
                 node = parents.get(node)
                 if node:
                         return find_in_scope(node, name)
+
                 if name in globals:
-                        return Variable(name=name, scope=global_scope, the_type=globals.get(name))
+                        return Variable(name=name, scope=global_scope, the_type=globals.get(name), read_only=True)
                 return None
 
         pending_vars = {}
@@ -46,9 +47,9 @@ def resolve_symbols(tree, state):
         def add_repeat_scope(test, block):
                 repeat_scopes[id(test)] = block
 
-        def add_var(node, name, the_type=None):
+        def add_var(node, name, the_type=None, read_only=False):
                 scope = scopes.get(node)
-                var = scope.add_var(name, the_type)
+                var = scope.add_var(name, the_type, read_only=read_only)
                 return var
 
         def add_pending_var(node, name, on_what):
@@ -70,11 +71,11 @@ def resolve_symbols(tree, state):
 
         scopes.open(tree)
 
-        add_var(tree, "_G", TypeAny())
-        add_var(tree, "_ENV", TypeAny())
+        add_var(tree, "_G", TypeAny(), read_only=True)
+        add_var(tree, "_ENV", TypeAny(), read_only=True)
         for predef, type in context.items():
 #               print(predef, type)
-                add_var(tree, predef, type)
+                add_var(tree, predef, type, read_only=True)
 
         for node in ast.walk(tree):
                 parent = parents.get(node)

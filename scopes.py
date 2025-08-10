@@ -28,8 +28,8 @@ class Scope:
                         return symbol.the_type
                 return None
 
-        def add_var(self, name, the_type=None):
-                var = Variable(name, scope=self, the_type=the_type)
+        def add_var(self, name, the_type=None, read_only=False):
+                var = Variable(name, scope=self, the_type=the_type, read_only=read_only)
                 self._values[name] = var                
                 return var
 
@@ -83,7 +83,7 @@ uniq = 0
 
 class Variable:
         
-        def __init__(self, name, scope, the_type=None):
+        def __init__(self, name, scope, the_type=None, read_only=False):
                 self.name = name
                 self.scope = scope
                 self.return_frame = None
@@ -91,6 +91,7 @@ class Variable:
                 self.the_type = the_type
                 global uniq
                 self.count = uniq
+                self.read_only = read_only
                 uniq += 1
 
         def __hash__(self):

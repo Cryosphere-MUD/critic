@@ -97,5 +97,5 @@ def make_global_scope(bindings_global):
         for symbol in GLOBAL_SYMBOLS:
                 global_scope[symbol] = TypeFunctionAny(name=symbol)
                 global_scope[symbol].is_global = True
-
+                
         return global_scope
