@@ -2,7 +2,7 @@ import json
 from types import MappingProxyType
 
 from mudtypes import TypeSpecificMudObject
-from mudversion import get_world_path
+from mudversion import get_world_path, get_intrinsic_zones
 
 def load_universe():
         with open(get_world_path()) as world_json:
@@ -34,7 +34,7 @@ def load_universe():
 valid_quests = {}
 valid_minis = {}
 valid_sims = {}
-valid_zonetags = set(("@auto", ))
+valid_zonetags = set(get_intrinsic_zones())
 
 UNIVERSE_BY_ID: dict[str, dict[str, int | str | list[str]]] = {}
 

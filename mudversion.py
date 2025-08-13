@@ -33,5 +33,8 @@ def get_pflags_path():
 def has_events():
         return get_config().get("events")
 
+def get_intrinsic_zones():
+        return get_config().get("zones", ())
+
 def is_musicmud():
         return get_config().get("musicmud")
