@@ -131,8 +131,12 @@ def parse_bindings(file):
                                 else:
                                         min_args += 1
 
-                                if argname == "varargs" or "..." in argtype:
+                                if argname == "varargs":
                                         var_args = True
+                                
+                                if argtype.endswith("..."):
+                                        var_args = True
+                                        argtype = argtype[0:-3]
 
                                 if name == "set" and i == 2:
                                         arg_types.append(TypeAny()) # hardcoded overloading
