@@ -2,8 +2,9 @@
 
 import os, sys
 
-from luatypes import TypeFunction, TypeAny, TypeModule, TypeNumber, TypeString, TypeNil, TypeBool, TypeNilString, TypeTable, TypeUnionType, TypeKey, TypeZoneTag, TypeEventName
+from luatypes import TypeFunction, TypeAny, TypeModule, TypeNumber, TypeString, TypeNil, TypeBool, TypeNilString, TypeTable, TypeUnionType, TypeKey, TypeZoneTag, TypeEventName, TypeUnion, TypeNumberRange
 from mudtypes import TypeMudObjectOrID, TypeMudObject
+from tabletypes import TypeStruct
 
 module = None
 
@@ -13,17 +14,41 @@ def set_module(module_id):
 
 
 basic_types = {
-        "eventname": TypeEventName
+        "eventname": TypeEventName,
+        "nil": TypeNil
+}
+
+
+
+struct_types = {
+}
+
+global_symbols = {
 }
 
 
 def conv_type(argtype, isarg = False):
 
+        argtype = argtype.strip()
+
         if constructor := basic_types.get(argtype):
                 return constructor()
 
+        if "|" in argtype:
+                return TypeUnion(*[conv_type(arg, isarg) for arg in argtype.split("|")])
+        
         if argtype == "any":
                return TypeAny()
+        
+        if len(argtype) > 1 and argtype[0] == '\"' and argtype[-1] == '\"':
+                return TypeString(argtype[1:-1])
+        
+        if argtype.isnumeric():
+                num = int(argtype)
+                return TypeNumberRange(num, num)
+
+        if struct := struct_types.get(argtype):
+                return struct
 
         if argtype.startswith("object") or argtype.startswith("player"):
                 if isarg:
@@ -123,7 +148,7 @@ def parse_bindings(file):
                                 max_args += 1
 
                                 arg = arg.strip()
-                                argtype, argname = arg.split(" ")
+                                argtype, argname = arg.rsplit(" ", 1)
 
                                 if ":" in argname:
                                         argname, _ = argname.split(":")
@@ -182,7 +207,36 @@ def parse_bindings(file):
 
                         #module_fns.setdefault(module, []).append(name)
 
+        def handle_struct_defn(name, defns):
+                fields = {}
+                for l in defns.split("\n"):
+                        l = l.strip()
+                        if not l:
+                                continue
+                        if l[-1] == ";":
+                                l = l[:-1]
+                        type, field = l.rsplit(" ", 1)
+                        fields[field] = conv_type(type, False)
+                name = name.strip()
+
+                if name in struct_types:
+                        struct_types[name].fields = fields
+                else:
+                        struct_types[name] = TypeStruct(name, fields)
+
+        def handle_type_defn(arg):
+                name, defn = arg.split("=")
+                struct_types[name.strip()] = conv_type(defn.strip(), False)
+
+        def handle_global(arg):
+                if arg[-1] == ";":
+                        arg = arg[:-1]
+                type, name = arg.rsplit(" ", 1)
+                global_symbols[name.strip()] = conv_type(type.strip(), False)
+
         incpp = False
+        defining_struct = None
+        struct_defn = ""
 
         try:
                 for line in file:
@@ -191,6 +245,14 @@ def parse_bindings(file):
                                 if line == "}\n":
                                         incpp = False
                                         continue
+                                continue
+
+                        if defining_struct:
+                                if line == "}\n" or line == "};\n":
+                                        handle_struct_defn(defining_struct, struct_defn)
+                                        defining_struct = False
+                                        continue
+                                struct_defn += line
                                 continue
 
                         line = line.strip()
@@ -204,6 +266,22 @@ def parse_bindings(file):
                                 set_module(line[7:])
                                 continue
                         if line[0:6] == "module":
+                                continue
+
+                        if line[0:7] == "struct ":
+                                if "{" in line:
+                                        defining_struct = line[7:].split("{")[0]
+                                        struct_defn = ""
+                                else:
+                                        handle_struct_defn(line[7:], "")
+                                continue
+
+                        if line[0:5] == "type ":
+                                handle_type_defn(line[5:])
+                                continue
+
+                        if line[0:7] == "global ":
+                                handle_global(line[7:])
                                 continue
 
                         if "=" in line:

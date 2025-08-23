@@ -39,11 +39,12 @@ for arg in args.objects:
                 ZONE.append(arg)
 
 if CHUNKS:
-        for chunk in CHUNKS:
+        for chunk, obj in zip(CHUNKS, args.objects):
+                print(obj)
                 validate_chunk(chunk, return_type=[TypeAny()])
-        if had_error():
-                print("there were errors")
-                exit(1)
+                if had_error():
+                        print("there were errors")
+                        exit(1)
         else:
                 print("all ok")
                 exit(0)
