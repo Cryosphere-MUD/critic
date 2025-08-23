@@ -44,27 +44,27 @@ def register_mud_global_scope(global_scope):
 
         global_scope["rank"] = CapitalsModule("POfficer", "Crewman", "commander", "Captain", "Commodore")
         
-        global_scope["util"].add("explode", TypeAny())
-        global_scope["util"].add(TypeFunction(name="colour_reverse", args=[TypeString()], return_type=TypeString()))
-        global_scope["util"].add("colour_trim", TypeAny())
-        global_scope["util"].add("formatitime", TypeAny())
+        # global_scope["util"].add("explode", TypeAny())
+        # global_scope["util"].add(TypeFunction(name="colour_reverse", args=[TypeString()], return_type=TypeString()))
+        # global_scope["util"].add("colour_trim", TypeAny())
+        # global_scope["util"].add("formatitime", TypeAny())
 
-        global_scope["cash"].add("match", TypeAny())
+        # global_scope["cash"].add("match", TypeAny())
 
-        global_scope["mud"].add("planet_objects", TypeFunctionAny(name="planet_objects"))
-        global_scope["mud"].add("is_planet", TypeFunctionAny(name="is_planet"))
+        # global_scope["mud"].add("planet_objects", TypeFunctionAny(name="planet_objects"))
+        # global_scope["mud"].add("is_planet", TypeFunctionAny(name="is_planet"))
 
-        global_scope["lock"] = TypeFunction(name="lock", args=[TypeMudObjectOrID(), TypeAny()], min_args=1)
-        global_scope["open"] = TypeFunction(name="open", args=[TypeMudObjectOrID(), TypeAny()], min_args=1)
-        global_scope["close"] = TypeFunction(name="close", args=[TypeMudObjectOrID(), TypeAny()], min_args=1)
-        global_scope["pressurise"] = TypeFunction(name="pressurise", args=[TypeMudObjectOrID(), TypeAny()], min_args=1)
-        global_scope["depressurise"] = TypeFunction(name="depressurise", args=[TypeMudObjectOrID(), TypeAny()], min_args=1)
+        # global_scope["lock"] = TypeFunction(name="lock", args=[TypeMudObjectOrID(), TypeAny()], min_args=1)
+        # global_scope["open"] = TypeFunction(name="open", args=[TypeMudObjectOrID(), TypeAny()], min_args=1)
+        # global_scope["close"] = TypeFunction(name="close", args=[TypeMudObjectOrID(), TypeAny()], min_args=1)
+        # global_scope["pressurise"] = TypeFunction(name="pressurise", args=[TypeMudObjectOrID(), TypeAny()], min_args=1)
+        # global_scope["depressurise"] = TypeFunction(name="depressurise", args=[TypeMudObjectOrID(), TypeAny()], min_args=1)
 
-        global_scope["plural"] = TypeFunction(name="plural", args=[TypeAny()], return_type=TypeBool())
+        # global_scope["plural"] = TypeFunction(name="plural", args=[TypeAny()], return_type=TypeBool())
 
         global_scope["error"] = TypeFunction(name="error", args=[TypeString()], min_args=0, no_return=True)
 
-        GLOBAL_SYMBOLS = ("import", "airtight_rooms", "sendrg", "check_syntax",
+        GLOBAL_SYMBOLS = ("import", "sendrg", "check_syntax",
                           "rawget", "get_max_opcount", "get_opcount", "proxy_table", "get_route", "clone")
 
         for symbol in GLOBAL_SYMBOLS:

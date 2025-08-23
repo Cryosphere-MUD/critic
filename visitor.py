@@ -1,6 +1,7 @@
 from luaparser import ast, astnodes
 from luatypes import TypeModule, TypeAny, TypeFunction, TypeNumber, TypeFunctionAny, TypeString, TypeBool, TypeNilString, TypeNil, TypeUnionType, TypeTable, TypeUnion, TypeNumberRange, AnyModule, TypeBase, TypeInvalid, TypeStringKnownPrefix, TypeTranslatedString, TypeMap
 from mudtypes import TypeMudObjectOrID, TypeMudObject, TypeSpecificMudObject
+from tabletypes import TypeStruct
 import mudtypes
 from mudversion import is_musicmud
 from scopes import Variable
@@ -14,169 +15,169 @@ import functions
 FUNCTION_MODULES = [functions]
 
 if is_musicmud():
-        import mudfunctions
-        FUNCTION_MODULES.append(mudfunctions)
+    import mudfunctions
+    FUNCTION_MODULES.append(mudfunctions)
 
 
 def panic(value):
-        print("panic")
-        exit(value)
+    print("panic")
+    exit(value)
 
 class FunctionScope:
-        def __init__(self, node):
-                self._node = node
-                self._rtypes = []
+    def __init__(self, node):
+            self._node = node
+            self._rtypes = []
 
-        def add_return(self, rtypes):
-                self._rtypes.append(rtypes)
+    def add_return(self, rtypes):
+            self._rtypes.append(rtypes)
 
-        def returns(self):
-                max_len = max(len(rtype) for rtype in self._rtypes) if self._rtypes else 0
-                for type in self._rtypes:
-                        for r in range(len(type), max_len):
-                                type.append(TypeAny())
-                return self._rtypes
+    def returns(self):
+            max_len = max(len(rtype) for rtype in self._rtypes) if self._rtypes else 0
+            for type in self._rtypes:
+                    for r in range(len(type), max_len):
+                            type.append(TypeAny())
+            return self._rtypes
 
-        def returns_union(self):
-                returns = self.returns()
-                out = []
-                max_len = max(len(rtype) for rtype in self._rtypes) if self._rtypes else 0
-                for idx in range(max_len):
-                        l = [r[idx] for r in returns]
-                        out.append(TypeUnion(*l))
-                return tuple(out)
+    def returns_union(self):
+            returns = self.returns()
+            out = []
+            max_len = max(len(rtype) for rtype in self._rtypes) if self._rtypes else 0
+            for idx in range(max_len):
+                    l = [r[idx] for r in returns]
+                    out.append(TypeUnion(*l))
+            return tuple(out)
 
 class ConditionalNarrowing:
 
-        def __init__(self, variable, exclude = None, only = None):
+    def __init__(self, variable, exclude = None, only = None):
 
-                assert isinstance(variable, Variable)
+            assert isinstance(variable, Variable)
 
-                self.variable = variable
+            self.variable = variable
 
-                assert isinstance(exclude, (type(None), TypeBase))
-                assert isinstance(only, (type(None), TypeBase))
+            assert isinstance(exclude, (type(None), TypeBase))
+            assert isinstance(only, (type(None), TypeBase))
 
-                self.exclude = exclude
-                self.only = only
+            self.exclude = exclude
+            self.only = only
 
-        def __iter__(self):
-                yield self.variable
-                yield self.exclude
-                yield self.only
+    def __iter__(self):
+            yield self.variable
+            yield self.exclude
+            yield self.only
 
 
 calldata = {}
 
 def countcall(fn):
-        name = fn.name
-        if isinstance(name, astnodes.Name):
-                name = name.id
-        global calldata
-        if name not in calldata:
-                calldata[name] = 0
-        calldata[name] += 1
+    name = fn.name
+    if isinstance(name, astnodes.Name):
+            name = name.id
+    global calldata
+    if name not in calldata:
+            calldata[name] = 0
+    calldata[name] += 1
 
 
 class NarrowingData:
-        def __init__(self, data = None):
-                self._data = data or {}
+    def __init__(self, data = None):
+            self._data = data or {}
 
-        def __contains__(self, variable):
-                assert isinstance(variable, Variable)
-                return variable in self._data
+    def __contains__(self, variable):
+            assert isinstance(variable, Variable)
+            return variable in self._data
 
-        def __getitem__(self, variable):
-                assert isinstance(variable, Variable)
-                return self._data.get(variable)
+    def __getitem__(self, variable):
+            assert isinstance(variable, Variable)
+            return self._data.get(variable)
 
-        def get(self, variable):
-                return self._data.get(variable)
-        
-        def update(self, other):
-                self._data.update(other._data)
+    def get(self, variable):
+            return self._data.get(variable)
+    
+    def update(self, other):
+            self._data.update(other._data)
 
-        def add_narrowing(self, symbol, the_type):
-                assert isinstance(symbol, Variable)
-                assert isinstance(the_type, TypeBase)
+    def add_narrowing(self, symbol, the_type):
+            assert isinstance(symbol, Variable)
+            assert isinstance(the_type, TypeBase)
 
-                self._data[symbol] = the_type
+            self._data[symbol] = the_type
 
-        def merge_with_union(self, other):
-                new = {}
-                for key, type in self._data.items():
-                        if other_type := other.get(key):
-                                new[key] = TypeUnion(type, other_type)
-                return NarrowingData(new)
+    def merge_with_union(self, other):
+            new = {}
+            for key, type in self._data.items():
+                    if other_type := other.get(key):
+                            new[key] = TypeUnion(type, other_type)
+            return NarrowingData(new)
 
-        def keys(self):
-                yield from self._data.keys()
+    def keys(self):
+            yield from self._data.keys()
 
-        def __str__(self):
-                s = ""
-                for symbol, type in self._data.items():
-                        if s:
-                                s += ", "                        
-                        s += str(symbol)
-                        s += " = "
-                        s += str(type)
-                return f"[Narrow {s}]"
+    def __str__(self):
+            s = ""
+            for symbol, type in self._data.items():
+                    if s:
+                            s += ", "                        
+                    s += str(symbol)
+                    s += " = "
+                    s += str(type)
+            return f"[Narrow {s}]"
 
 
 class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvaluator, ComparisonEvaluator, LogicEvaluator):
         def __init__(self, *, universe, state):
-                self.state = state
+            self.state = state
 
-                self._universe = universe
-                self._node_types = {}
-                self._narrowings = []
-                mudtypes.setValidator(self.check_objectid)
-                self._return_frames = []
-                self._locked = {}
-                self._condition_narrowings = {}
-                self.resolution = state.resolutions
-                self._terminating = set()
+            self._universe = universe
+            self._node_types = {}
+            self._narrowings = []
+            mudtypes.setValidator(self.check_objectid)
+            self._return_frames = []
+            self._locked = {}
+            self._condition_narrowings = {}
+            self.resolution = state.resolutions
+            self._terminating = set()
 
-                self._remembered_narrowings = {}
+            self._remembered_narrowings = {}
 
-                self._visit_stack = []
+            self._visit_stack = []
 
-                self.scopes = state.scopes
+            self.scopes = state.scopes
 
-                self.deferred_validate = []
+            self.deferred_validate = []
 
-                self.doing_deferred = 0
+            self.doing_deferred = 0
 
         def check_objectid(self, id):
 
-                if id in self._universe:
-                        return self._universe.get(id)
+            if id in self._universe:
+                    return self._universe.get(id)
 
-                if id.startswith(prefix := "@auto:"):
-                        id = id[len(prefix):]
-                        id, obj_code = id.split(":")
+            if id.startswith(prefix := "@auto:"):
+                    id = id[len(prefix):]
+                    id, obj_code = id.split(":")
 
-                        obj = self._universe.get(id)
-                        if obj is None:
-                                return None
+                    obj = self._universe.get(id)
+                    if obj is None:
+                            return None
 
-                        auto_part, auto_cloneno = obj_code.split("/")
-                        if int(auto_part) >= obj.get("auto.count", 0):
-                                return None
+                    auto_part, auto_cloneno = obj_code.split("/")
+                    if int(auto_part) >= obj.get("auto.count", 0):
+                            return None
 
-                        if int(auto_cloneno) >= obj.get(f"auto.{auto_part}.count", 1):
-                                return None
+                    if int(auto_cloneno) >= obj.get(f"auto.{auto_part}.count", 1):
+                            return None
 
-                        return obj.get(f"auto.{auto_part}")
+                    return obj.get(f"auto.{auto_part}")
 
-                if id.startswith("@wild_"):
-                        return True
+            if id.startswith("@wild_"):
+                    return True
 
-                if id.startswith("@skin_"):
-                        return True
+            if id.startswith("@skin_"):
+                    return True
 
-                if id == "@pl":
-                        return True
+            if id == "@pl":
+                    return True
                 
         def add_lock(self, node, reason):
                 self._locked.setdefault(id(node), []).append(reason)
@@ -971,9 +972,9 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
 
                         if isinstance(node.value.value, astnodes.Name):
                                 inner_symbol_type = self.get_type(node.value.value)
-                                if isinstance(inner_symbol_type, TypeMudObject):
+                                if isinstance(inner_symbol_type, (TypeMudObject, TypeStruct)):
                                         str_value = node.value.idx.id + "." + node.idx.id
-                
+
                         self.set_type(node, TypeAny())
 
                         if str_value:
@@ -1027,7 +1028,8 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
                                                 self.set_type(node, TypeAny())
                                                 return
 
-                if isinstance(symbol_type, (TypeSpecificMudObject, TypeMudObject)):
+                if isinstance(symbol_type, (TypeSpecificMudObject, TypeMudObject, TypeStruct)):
+
                         str_value = None
                         if isinstance(node.idx, ast.String):
                                 str_value = node.idx.s
@@ -1044,7 +1046,8 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
                                 if field_type := symbol_type.check_field(str_value):
                                         self.set_type(node, field_type)
                                 else:
-                                        # self.warning(f"unknown field {str_value} on {symbol_type.id}")
+                                        if symbol_type.missing_field_is_error:
+                                                self.warning(f"unknown field {str_value} on {symbol_type.id}")
                                         # these actually come out as Nil if they're not defined
                                         self.set_type(node, TypeAny())
 

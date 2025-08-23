@@ -38,3 +38,6 @@ def get_intrinsic_zones():
 
 def is_musicmud():
         return get_config().get("musicmud")
+
+def is_aardmud():
+        return get_config().get("aardmud")
