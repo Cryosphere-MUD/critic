@@ -1,6 +1,6 @@
 import typing
 
-from context import default_context, in_global
+from context import in_global, get_default_context
 from errors import error, set_filename
 from events import MudEvent, check_valid_event
 from luatypes import TypeMap, TypeUnion, TypeAny
@@ -9,7 +9,7 @@ from universe import UNIVERSE_BY_ID, TREATAS_USERS
 from chunkvalidate import validate_chunk
 
 def get_context_and_return_type(args, item, itemid, key, chunkpart):
-	context = dict(default_context)
+	context = get_default_context()
 
 	event_validity = check_valid_event(chunkpart)
 

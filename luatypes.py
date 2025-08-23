@@ -206,6 +206,7 @@ class TypeTable(TypeBase):
                 self.non_numeric = non_numeric
                 self.key = key
                 self.value = value
+                self.missing_field_is_error = False
 
         def items(self):
                 if self._table is None:
@@ -352,7 +353,12 @@ class TypeString(TypeBase):
         def convertible_from(self, source):
                 if isinstance(source
                               , TypeString) and (self.tainted or (self.tainted == source.tainted)):
+
+                        if self.values and source.values:
+                                return all(origin in self.values for origin in source.values)
+
                         return True
+
 
                 if isinstance(source, TypeNumber):
                         return True
