@@ -232,7 +232,16 @@ def parse_bindings(file):
                 if arg[-1] == ";":
                         arg = arg[:-1]
                 type, name = arg.rsplit(" ", 1)
-                global_symbols[name.strip()] = conv_type(type.strip(), False)
+
+                if module:
+                        if module not in module_fns:
+                                module_fns[module] = TypeModule()
+
+                        module_fns[module].add(name, conv_type(type.strip(), False))
+
+                else:
+
+                        global_symbols[name.strip()] = conv_type(type.strip(), False)
 
         incpp = False
         defining_struct = None
@@ -301,7 +310,7 @@ def parse_bindings(file):
         except EOFError:
 
                 pass
-        
+
         return global_fns, module_fns, klass_fns
 
 

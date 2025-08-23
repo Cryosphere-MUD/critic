@@ -2,7 +2,7 @@ from luatypes import CapitalsModule, TypeNumber, TypeAny, TypeModule, TypeFuncti
 from mudtypes import TypeMudObjectOrID
 
 from mudglobals import register_mud_global_scope
-from mudversion import is_musicmud
+from mudversion import is_musicmud, is_aardmud
 
 GLOBAL_SYMBOLS = ("pairs", "ipairs", "explode", "loadstring", "strbyte", 
                   "pcall", "unpack", "next", "xpcall", "load")
