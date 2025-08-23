@@ -1,7 +1,7 @@
 check:prepare-venv
-	# @if [ -f .critic.config ]; then \
-	# 	$(MAKE) dump-lua; \
-	# fi
+	@if [ -f .critic.config ]; then \
+		$(MAKE) dump-lua; \
+	fi
 	ln -sfn py-lua-parser/luaparser .
 	. venv/bin/activate && ./validate-this.py
 
@@ -17,9 +17,9 @@ dump-lua:
 	cd ../ && src/musicmud --dump
 
 validate-lua:
-	# @if [ -f .critic.config ]; then \
-	# 	$(MAKE) dump-lua; \
-	# fi
+	@if [ -f .critic.config ]; then \
+		$(MAKE) dump-lua; \
+	fi
 	ln -sfn py-lua-parser/luaparser .
 	venv/bin/python ./validator.py
 
