@@ -8,7 +8,7 @@ check:prepare-venv
 validate: prepare-venv dump-lua validate-lua
 
 prepare-venv:
-	test -d venv || python3.11 -m venv venv
+	test -d venv || python3 -m venv venv
 	. venv/bin/activate && pip install --upgrade pip
 	. venv/bin/activate && pip install multimethod antlr4-python3-runtime luapatt
 

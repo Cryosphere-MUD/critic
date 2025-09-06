@@ -24,11 +24,8 @@ def get_bindings_glob():
 def get_world_path():
         return get_config().get("world")
 
-def get_flags_path():
-        return get_config().get("flags")
-
-def get_pflags_path():
-        return get_config().get("pflags")
+def get_flag_modules():
+        return get_config().get("flag_modules")
 
 def has_events():
         return get_config().get("events")

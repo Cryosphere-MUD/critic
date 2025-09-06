@@ -3,6 +3,7 @@ from types import MappingProxyType
 
 from mudtypes import TypeMudObject
 from bindings import BINDINGS, MODULE_SYMBOLS, CLASS_METHODS
+from bindingsparser import global_symbols
 from context import get_default_context
 from globals import make_global_scope
 from errors import error, got_error
