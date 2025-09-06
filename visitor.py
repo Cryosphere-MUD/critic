@@ -934,6 +934,10 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
 
         def exit_Index(self, node):
 
+                if isinstance(self.grandparent(), astnodes.Assign) and node in self.grandparent().targets:
+                        self.set_type(node, TypeAny())
+                        return
+
                 symbol_type = self.get_type(node.value)
         
                 # this handles the o1.rooms.count case
@@ -1072,6 +1076,7 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
                         return
 
                 if isinstance(symbol_type, TypeMap):
+                        
                         if node.notation == ast.IndexNotation.DOT:
                                 assert isinstance(node.idx, astnodes.Name)
                                 the_type = symbol_type.get_member(node.idx.id)
