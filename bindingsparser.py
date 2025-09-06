@@ -232,7 +232,7 @@ def parse_bindings(file):
                 if arg[-1] == ";":
                         arg = arg[:-1]
                 type, name = arg.rsplit(" ", 1)
-
+                
                 if module:
                         if module not in module_fns:
                                 module_fns[module] = TypeModule()
@@ -241,7 +241,7 @@ def parse_bindings(file):
 
                 else:
 
-                        global_symbols[name.strip()] = conv_type(type.strip(), False)
+                        global_fns[name.strip()] = conv_type(type.strip(), False)
 
         incpp = False
         defining_struct = None
