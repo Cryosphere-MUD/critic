@@ -14,6 +14,8 @@ from validatorstate import ValidatorState
 from visitor import MusicLUAVisitor
 from extrachunk import extra_chunks
 
+GLOBALS = None
+
 def validate_chunk(lua, context = None, rewrite_warning_disabled = False, itemid = None, no_detailed = False, return_type = None):
 
         if context is None:
@@ -34,10 +36,13 @@ def validate_chunk(lua, context = None, rewrite_warning_disabled = False, itemid
                 error(f"failed parsing")
                 return
 
+        
         bindings_global = BINDINGS
         BINDINGS.update(MODULE_SYMBOLS)
 
+        global GLOBALS
         global_scope = make_global_scope(bindings_global)
+        GLOBALS = global_scope
 
         state = ValidatorState()
         state.parents = parents.get_parents(tree)

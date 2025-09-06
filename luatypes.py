@@ -53,6 +53,8 @@ class TypeBase:
         def strings(self):
                 return []
 
+        def lookup_method(self, methodname):
+                return None
 
 class TypeAny(TypeBase):
         def __str__(self):
@@ -365,6 +367,10 @@ class TypeString(TypeBase):
         
                 return super().convertible_from(source)
 
+        def lookup_method(self, methodname):
+                from chunkvalidate import GLOBALS
+                return GLOBALS["string"].lookup(methodname)
+
 
 class TypeTranslatedString(TypeString):
         def __str__(self):
@@ -496,6 +502,14 @@ class TypeUnionType(TypeBase):
 
         def is_only(self, source):
                 return all(isinstance(member, source) for member in self._types)
+
+        def lookup_method(self, methodname):
+                method = None
+                for type in self._types:
+                        method = type.lookup_method(methodname)
+                        if not method:
+                                return None
+                return method
 
         def denil(self):
                 denilled = set(filter(lambda f: not isinstance(f, TypeNil), self._types))

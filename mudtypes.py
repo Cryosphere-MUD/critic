@@ -57,6 +57,10 @@ class TypeMudObject(TypeBase):
                         return TypeAny()
                  
                 return TypeAny()
+        
+        def lookup_method(self, methodname):
+                from bindings import CLASS_METHODS
+                return CLASS_METHODS["mudobject"].get(methodname)
 
 
 class TypeSpecificMudObject(TypeMudObject):
