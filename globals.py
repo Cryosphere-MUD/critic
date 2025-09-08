@@ -82,13 +82,12 @@ def make_global_scope(bindings_global):
         global_scope["assert"] = global_assert
 
         global_print = TypeFunction(name="print", args=[TypeAny()])
-        global_print.global_assert = True
-
-        global_scope["print"] = global_print
 
         def register_global(symbol):
                 symbol.is_global = True
                 global_scope[symbol.name] = symbol
+
+        register_global(global_print)
 
         register_global(TypeFunction(name="static_assert", args=[TypeAny()]))
         register_global(TypeFunction(name="tostring", args=[TypeAny()], return_type=TypeString()))

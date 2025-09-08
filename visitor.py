@@ -934,9 +934,9 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
 
         def exit_Index(self, node):
 
-                if isinstance(self.grandparent(), astnodes.Assign) and node in self.grandparent().targets:
-                        self.set_type(node, TypeAny())
-                        return
+                # if isinstance(self.grandparent(), astnodes.Assign) and node in self.grandparent().targets:
+                #         self.set_type(node, TypeAny())
+                #         return
 
                 symbol_type = self.get_type(node.value)
         
@@ -1152,18 +1152,7 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
                 return True
 
         def get_binding_return_type(self, symbol, args, args_valid):
-                from errors import quiet
                 if symbol.global_assert:
-                        if symbol.name == "print":
-                                arg_type = self.get_type(args[0])
-                                if isinstance(args[0], astnodes.Name):
-                                        arg = self.find_symbol(args[0])
-                                        if not quiet:
-                                                print(f"print() called on {arg} [{arg.the_type}] narrowed to", {arg_type})
-                                elif not quiet:
-                                        print(f"print() called on {arg_type}")
-                                return symbol.return_types
-
                         if isinstance(args[0], astnodes.Name):
                                 target = args[0]
                                 assert_target = self.find_symbol(target)
