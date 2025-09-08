@@ -1,4 +1,24 @@
+from luaparser import astnodes
 from luatypes import TypeBool, TypeString, TypeStringKnownPrefix, TypeUnion, TypeTable, TypeNumberRange, TypeNumber, TypeAny, TypeStringKnownPrefixType, TypeNil, TypeUnionType
+from errors import quiet
+
+
+def global_print(self, args):
+	if quiet:
+		return TypeNil()
+        
+	arg_type = self.get_type(args[0])
+	if isinstance(args[0], astnodes.Name):
+		arg = self.find_symbol(args[0])
+	else:
+		arg = None
+
+	if arg:
+		print(f"print() called on {arg} [{arg.the_type}] narrowed to", {arg_type})
+	elif not quiet:
+		print(f"print() called on {arg_type}")
+         
+	return TypeNil()
 
 
 def global_static_assert(self, args):

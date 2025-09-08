@@ -779,41 +779,15 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
 
                 args = [node.source] + node.args
 
-                if isinstance(source_type, TypeMudObject):
-                        class_methods = self.state.class_methods
+                class_method = source_type.lookup_method(node.func.id)
 
-                        if node.func.id not in class_methods["mudobject"]:
-                                self.error(f"method {node.func.id} not found on mudobject", node.func)
-                                return
-
-                        func = class_methods["mudobject"][node.func.id]
-                        self.handle_function_call(node, func, args)
+                if not class_method:
+                        self.error(f"method {node.func.id} not found on {source_type}", node.func)
                         return
+
+                self.handle_function_call(node, class_method, args)
+                return
                 
-                if isinstance(source_type, TypeString):
-                        if node.func.id in ("sub", "gsub"):
-                                self.set_type(node, TypeAny())
-                                return
-
-                if isinstance(source_type, TypeUnionType):
-                        for specific in source_type.types():
-                                if isinstance(specific, (TypeMudObject, TypeSpecificMudObject)):
-                                        if node.func.id not in self.state.class_methods["mudobject"]:
-                                                self.error(f"method {node.func.id} not found on mudobject", node.func)
-                                                return
-
-                                        continue
-
-                                self.error(f"invoke on unhandled option {specific} state.n {source_type}", node.source)
-                                return
-
-                        func = self.state.class_methods["mudobject"][node.func.id]
-                        self.handle_function_call(node, func, args)
-                        return
-
-                self.error(f"invoke on unhandled source {source_type}", node)
-                self.set_type(node, TypeAny())
-
         # no enter_Name
 
         def exit_Name(self, node):
@@ -960,6 +934,10 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
 
         def exit_Index(self, node):
 
+                # if isinstance(self.grandparent(), astnodes.Assign) and node in self.grandparent().targets:
+                #         self.set_type(node, TypeAny())
+                #         return
+
                 symbol_type = self.get_type(node.value)
         
                 # this handles the o1.rooms.count case
@@ -1098,6 +1076,7 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
                         return
 
                 if isinstance(symbol_type, TypeMap):
+                        
                         if node.notation == ast.IndexNotation.DOT:
                                 assert isinstance(node.idx, astnodes.Name)
                                 the_type = symbol_type.get_member(node.idx.id)
@@ -1117,18 +1096,8 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
                         self.set_type(node, TypeAny())
                         return
 
-#                self.dump_scopes()
-
                 self.error(f"index on unrecognised thing {node.value.id} {node.value} with type {symbol_type}", node)
                 panic(1)
-
-        def lookup_mudobject(self, arg):
-                if isinstance(arg, TypeString) and arg.values:
-                        if self._universe.get(arg.values[0]):
-                                obj = self._universe.get(arg.values[0])
-                                if obj:
-                                        return TypeSpecificMudObject(obj)
-                return TypeMudObject()
 
         def validate_args(self, function, args):
                 assert function is not None
@@ -1183,18 +1152,7 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
                 return True
 
         def get_binding_return_type(self, symbol, args, args_valid):
-                from errors import quiet
                 if symbol.global_assert:
-                        if symbol.name == "print":
-                                arg_type = self.get_type(args[0])
-                                if isinstance(args[0], astnodes.Name):
-                                        arg = self.find_symbol(args[0])
-                                        if not quiet:
-                                                print(f"print() called on {arg} [{arg.the_type}] narrowed to", {arg_type})
-                                elif not quiet:
-                                        print(f"print() called on {arg_type}")
-                                return symbol.return_types
-
                         if isinstance(args[0], astnodes.Name):
                                 target = args[0]
                                 assert_target = self.find_symbol(target)
