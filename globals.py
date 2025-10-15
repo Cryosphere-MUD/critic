@@ -56,6 +56,7 @@ def MakeStringModule():
 
         type.add(string_format)
         type.add(TypeFunctionAny(name="gsub"))
+        type.add(TypeFunctionAny(name="reverse"))
         type.add(TypeFunctionAny(name="char"))
         type.add(TypeFunctionAny(name="upper"))
         type.add(TypeFunction(name="lower", args=[TypeString()], return_type=TypeString()))
