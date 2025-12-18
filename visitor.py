@@ -152,7 +152,7 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
 
             if id in self._universe:
                     return self._universe.get(id)
-
+        
             if id.startswith(prefix := "@auto:"):
                     id = id[len(prefix):]
                     id, obj_code = id.split(":")
@@ -876,7 +876,7 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
         # no exit_Number
 
         def enter_String(self, node):
-                self.set_type(node, TypeString(node.s, tainted=False))
+                self.set_type(node, TypeString(node.s.decode("UTF-8"), tainted=False))
 
         # no exit_String
 
@@ -889,6 +889,8 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
                 table = {}
                 non_numeric = False
 
+                key = 0
+
                 for f in node.fields:
                         
                         if isinstance(f.key, astnodes.Name):
@@ -899,6 +901,8 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
                         elif isinstance (f.key, astnodes.String):
                                 string = True
                                 key = f.key.s
+                        elif f.key is None:
+                                key = key + 1
                         else:
                                 self.error(f"unexpected key {f.key} in table", f.key)
                                 panic(1)
@@ -994,11 +998,15 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
                                         return
 
                                 if node.notation == ast.IndexNotation.SQUARE:
+                                        
+                                        
                                         if isinstance(node.idx, astnodes.String):
-                                                if not symbol_type.contains(node.idx.s):
-                                                        self.error(f"unrecognised {symbol.name}.{node.idx.s}")
+                                                s = node.idx.s.decode("UTF-8")
+                                                
+                                                if not symbol_type.contains(s):
+                                                        self.error(f"unrecognised {symbol.name}.{s}")
                                                         exit(1)
-                                                self.set_type(node, symbol_type.lookup(node.idx.s))
+                                                self.set_type(node, symbol_type.lookup(s))
                                                 return
 
                                         if isinstance(node.idx, (astnodes.Name, astnodes.Index)):
