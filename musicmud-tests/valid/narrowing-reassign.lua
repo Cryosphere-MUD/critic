@@ -1,4 +1,4 @@
-local a = ship.get_docked("level1_1")
+local a = ships.get_docked("level1_1")
 
 local co=getobj(a,"owner")
 
