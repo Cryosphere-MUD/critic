@@ -30,6 +30,7 @@ def MakeMathModule():
         math.add(TypeFunction(name="atan2", args=[TypeNumberOrString(), TypeNumberOrString()], return_type=TypeNumber()))
         math.add(TypeFunction(name="rad", args=[TypeNumberOrString()], return_type=TypeNumber()))
         math.add(TypeFunction(name="random", args=[TypeNumberOrString(), TypeNumberOrString()], return_type=TypeNumber(), min_args=1))
+        math.add("pi", TypeNumber())
         math.add("huge", TypeNumber())
         return math
 
