@@ -445,6 +445,23 @@ def get_objects(obj_type):
         return objects
 
 
+def global_mud_getfloor(self, args):
+        obj_type = self.get_type(args[0])
+        
+        types = set()
+        
+        for obj in get_objects(obj_type):
+                if not isinstance(obj, TypeSpecificMudObject):
+                        return TypeAny()
+
+                if "Room" not in obj.mudobject.get("flags") or obj.mudobject.get("floor") == "-":
+                        types.add(TypeNil())
+                        continue
+                
+                types.add(TypeMudObject())
+                
+        return TypeUnion(*types)
+        
 def global_obj_file_plan(self, args):
         if len(args) < 1:
                 self.error("file_plan called with insufficient arguments", self.this())
