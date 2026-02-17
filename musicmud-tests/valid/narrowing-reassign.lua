@@ -1,6 +1,6 @@
-local a = ships.get_docked("level1_1")
+local a = assume(ships.get_docked("level1_1"))
 
-local co=getobj(a,"owner")
+local co= getobj(a,"owner")
 
 if not co then
   co=getstr(a,"owner")
