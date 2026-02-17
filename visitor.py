@@ -782,7 +782,7 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
                 class_method = source_type.lookup_method(node.func.id)
 
                 if not class_method:
-                        self.error(f"method {node.func.id} not found on {source_type}", node.func)
+                        self.error(f"method {node.func.id} not found on {source_type}", node)
                         return
 
                 self.handle_function_call(node, class_method, args)
@@ -1044,7 +1044,7 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
                                 if isinstance(specific, (TypeSpecificMudObject, TypeMudObject, TypeTable)):
                                         continue
 
-                                self.error(f"unhandled type option {specific} in {node.value.id}")
+                                self.error(f"unhandled type option {specific} in {node.value}", node)
                                 self.set_type(node, TypeAny())
                                 return
 
