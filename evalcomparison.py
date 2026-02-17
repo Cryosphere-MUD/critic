@@ -78,6 +78,9 @@ class ComparisonEvaluator:
                 left_type = self.get_type(node.left, allow_none=True)
                 right_type = self.get_type(node.right, allow_none=True)
 
+                if not left_type or not right_type:
+                        return
+
                 left_single = left_type.get_single_number()
                 right_single = right_type.get_single_number()
                 if left_single is not None and right_single is not None:
