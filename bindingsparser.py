@@ -98,6 +98,12 @@ def conv_type(argtype, isarg = False):
                 return TypeAny()
 
 
+class ParseResult:
+        def __init__(self, globals, modules, klasses, directives):
+                self.globals = globals
+                self.modules = modules
+                self.klasses = klasses
+                self.directives = directives
 
 def parse_bindings(file):
 
@@ -114,8 +120,10 @@ def parse_bindings(file):
         global_fns = {}
 
         klass_fns = {}
+        
+        directives = []
 
-        def handle_decl(decl):
+        def handle_decl(decl, defn, lineno):
 
                 decl = decl.lower()
 
@@ -128,6 +136,7 @@ def parse_bindings(file):
                         attributes = attstr.split(",")
 
                 return_type, rest = decl.split(" ", 1)
+                
                 name, args_part = rest.split("(")
                 args = args_part.strip()[:-1].split(",")
 
@@ -142,19 +151,26 @@ def parse_bindings(file):
                         min_args = 0
                         max_args = 0
                         arg_types = []
+                        arg_types_names = []
                         var_args = False
+                        arg_names = []
+                        arg_access = []
+                        arg_default = []
 
                         for i, arg in enumerate(args):
                                 max_args += 1
 
                                 arg = arg.strip()
                                 argtype, argname = arg.rsplit(" ", 1)
+                                access = None
+
+                                default = None
+                                
+                                is_optional = None
 
                                 if ":" in argname:
-                                        argname, _ = argname.split(":")
+                                        argname, default = argname.split(":")
                                         is_optional = "?"
-                                else:
-                                        min_args += 1
 
                                 if argname == "varargs":
                                         var_args = True
@@ -164,14 +180,35 @@ def parse_bindings(file):
                                         argtype = argtype[0:-3]
 
                                 if name == "set" and i == 2:
-                                        arg_types.append(TypeAny()) # hardcoded overloading
+                                        arg_types.append(TypeAny())
+                                        arg_types_names.append(argtype) # hardcoded overloading
                                 else:
+                                        if ":" in argtype:
+                                                argtype, access = argtype.split(":", 1)
                                         arg_types.append(conv_type(argtype, isarg=True))
+                                        arg_types_names.append(argtype)
+
+                                arg_names.append(argname)
+                                arg_access.append(access)
+                                arg_default.append(default)
+                                
+                                if not is_optional and not var_args:
+                                        min_args += 1
 
                                 #tl_args.append(argname + is_optional + ": " + the_type)
                         
-                        tf = TypeFunction(name=name, min_args=min_args, max_args=max_args, args=arg_types, varargs=var_args, return_type = 
-                                            conv_type(return_type))
+                        tf = TypeFunction(name=name,
+                                          min_args=min_args,
+                                          max_args=max_args,
+                                          args=arg_types,
+                                          varargs=var_args,
+                                          return_type=conv_type(return_type))
+                        
+                        tf.arg_types_names = arg_types_names
+                        tf.arg_names = arg_names
+                        tf.arg_access = arg_access
+                        tf.arg_default = arg_default
+                        tf.return_type = return_type
                         
                         if module:
                                 tf.module = module
@@ -180,31 +217,31 @@ def parse_bindings(file):
 
                         return tf
 
+                fn = build_argtypes(args)
+                fn.name = name
+                fn.defn = defn
+                fn.lineno = lineno
+                fn.klass = klass
 
                 if klass:
-                        fn = build_argtypes(args)
-                        fn.name = name
-                        
                         if klass not in klass_fns:
                                 klass_fns[klass] = {}
                         klass_fns[klass][name] = fn
 
                 if module is None:
-                        fn = build_argtypes(args)
-                        fn.name = name
                         fn.is_global = True
 
                         global_fns[name] = fn
+
+                        return fn
 
                 else:
                         if module not in module_fns:
                                 module_fns[module] = TypeModule()
 
-                        fn = build_argtypes(args)
-                        fn.name = name
-
                         module_fns[module].add(name, fn)
 
+                        return fn
                         #module_fns.setdefault(module, []).append(name)
 
         def handle_struct_defn(name, defns):
@@ -248,9 +285,10 @@ def parse_bindings(file):
         struct_defn = ""
 
         try:
-                for line in file:
+                for lineno, line in enumerate(file):
 
                         if incpp:
+                                incpp.defn += line
                                 if line == "}\n":
                                         incpp = False
                                         continue
@@ -268,7 +306,9 @@ def parse_bindings(file):
 
                         if not line:
                                 continue
+
                         if line[0] == '#':
+                                directives.append(line)
                                 continue
 
                         if line[0:7] == "module ":
@@ -299,18 +339,18 @@ def parse_bindings(file):
                                 decl = line
                                 defn = ""
 
-                        handle_decl(decl)
-
                         defn = defn.strip()
 
+                        fn = handle_decl(decl, defn, lineno)
+                        
                         if defn == "{":
-                                incpp = True
+                                incpp = fn
 
 
         except EOFError:
 
                 pass
 
-        return global_fns, module_fns, klass_fns
+        return ParseResult(global_fns, module_fns, klass_fns, directives)
 
 
