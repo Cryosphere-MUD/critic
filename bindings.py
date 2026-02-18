@@ -10,11 +10,12 @@ BINDINGS = {}
 
 for binding_filename in glob.glob(get_bindings_glob()):
         with open(binding_filename, "r") as file:
-                bindings, modules, klass = parse_bindings(file)
-                BINDINGS.update(bindings)		
-                MODULE_SYMBOLS.update(modules)
+                result = parse_bindings(file)
                 
-                for classname, methods in klass.items():
+                BINDINGS.update(result.globals)		
+                MODULE_SYMBOLS.update(result.modules)
+                
+                for classname, methods in result.klasses.items():
                         CLASS_METHODS.setdefault(classname, {}).update(methods)
                 
 CLASS_METHODS = MappingProxyType(CLASS_METHODS)

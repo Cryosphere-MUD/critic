@@ -129,7 +129,19 @@ class TypeModule(TypeBase):
         
         def lookup(self, rhs):
                 return self._values.get(rhs)
+
+        def items(self):
+                yield from self._values.items()
+
+        def keys(self):
+                yield from self._values.keys()
         
+        def __getitem__(self, item):
+                return self._values[item]
+
+        def __len__(self):
+                return len(self._values)
+
         def add(self, arg1, arg2 = None):
                 if arg2 is None:
                         name = arg1.name
@@ -498,7 +510,8 @@ class TypeUnionType(TypeBase):
                 return TypeUnion(*self._types, type)
         
         def __str__(self):
-                return " | ".join(str(type) for type in self._types)
+                types = sorted(str(type) for type in self._types)
+                return " | ".join(types)
 
         def is_only(self, source):
                 return all(isinstance(member, source) for member in self._types)
