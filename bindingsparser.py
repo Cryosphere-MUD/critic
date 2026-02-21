@@ -214,6 +214,8 @@ def parse_bindings(file):
                                 tf.module = module
 
                         tf.no_return = "noreturn" in attributes
+                        tf.query = "query" in attributes
+                        tf.pure = "pure" in attributes
 
                         return tf
 

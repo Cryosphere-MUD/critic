@@ -13,6 +13,8 @@ def get_context_and_return_type(args, item, itemid, key, chunkpart):
 
 	event_validity = check_valid_event(chunkpart)
 
+	const = False
+
 	return_type = None
 
 	if not event_validity:
@@ -24,6 +26,7 @@ def get_context_and_return_type(args, item, itemid, key, chunkpart):
 		for event_arg, event_value in event_validity.items():
 			context[event_arg] = event_value
 		return_type = event_validity.return_type
+		const = event_validity.const
 
 	if itemid and itemid not in TREATAS_USERS:
 		context["o1"] = TypeSpecificMudObject(item)
@@ -35,7 +38,7 @@ def get_context_and_return_type(args, item, itemid, key, chunkpart):
 
 	context = {ckey : cvalue for ckey, cvalue in context.items() if in_global(ckey)}
 
-	return context, return_type
+	return context, return_type, const
 
 def check_world(UNIVERSE_BY_ID, args, ZONE):
 
@@ -86,12 +89,12 @@ def check_world(UNIVERSE_BY_ID, args, ZONE):
 
 				set_filename(itemid + "." + key)
 
-				context, return_type = get_context_and_return_type(args, item, itemid, key, chunkpart)
+				context, return_type, const = get_context_and_return_type(args, item, itemid, key, chunkpart)
 
 				file = itemid + "." + key
 
 				try:
-					validate_chunk(value, context, rewrite_warning_disabled, itemid, no_detailed = no_detailed, return_type = return_type)
+					validate_chunk(value, context, rewrite_warning_disabled, itemid, no_detailed = no_detailed, return_type = return_type, const = const)
 				except KeyboardInterrupt:
 					print("interrupting")
 					exit(1)
