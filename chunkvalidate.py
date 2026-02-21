@@ -16,7 +16,7 @@ from extrachunk import extra_chunks
 
 GLOBALS = None
 
-def validate_chunk(lua, context = None, rewrite_warning_disabled = False, itemid = None, no_detailed = False, return_type = None):
+def validate_chunk(lua, context = None, rewrite_warning_disabled = False, itemid = None, no_detailed = False, return_type = None, const = False):
 
         if context is None:
                 context = get_default_context()
@@ -47,6 +47,7 @@ def validate_chunk(lua, context = None, rewrite_warning_disabled = False, itemid
         state = ValidatorState()
         state.parents = parents.get_parents(tree)
         state.context = context
+        state.const = const
         state.globals = MappingProxyType(global_scope)
         state.source = lua
         state.error_handler = error

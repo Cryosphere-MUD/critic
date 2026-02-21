@@ -4,7 +4,7 @@ from mudtypes import TypeMudObjectOrID
 from mudglobals import register_mud_global_scope
 from mudversion import is_musicmud, is_aardmud
 
-GLOBAL_SYMBOLS = ("pairs", "ipairs", "explode", "loadstring", "strbyte", 
+GLOBAL_SYMBOLS = (("pairs", True), ("ipairs", True), "explode", "loadstring", "strbyte", 
                   "pcall", "unpack", "next", "xpcall", "load")
 
 def MakeMathModule():
@@ -13,23 +13,23 @@ def MakeMathModule():
         def TypeNumberOrString():
                 return TypeUnion(TypeNumber(), TypeString())
 
-        math.add(TypeFunction(name="max", args=[TypeNumberOrString(), TypeNumberOrString()], return_type=TypeNumber()))
-        math.add(TypeFunction(name="min", args=[TypeNumberOrString(), TypeNumberOrString()], return_type=TypeNumber()))
-        math.add(TypeFunction(name="fmod", args=[TypeNumberOrString(), TypeNumberOrString()], return_type=TypeNumber()))
-        math.add(TypeFunction(name="pow", args=[TypeNumberOrString(), TypeNumberOrString()], return_type=TypeNumber()))
-        math.add(TypeFunction(name="ceil", args=[TypeNumberOrString()], return_type=TypeNumber()))
-        math.add(TypeFunction(name="floor", args=[TypeNumberOrString()], return_type=TypeNumber()))
-        math.add(TypeFunction(name="abs", args=[TypeNumberOrString()], return_type=TypeNumber()))
-        math.add(TypeFunction(name="log10", args=[TypeNumberOrString()], return_type=TypeNumber()))
-        math.add(TypeFunction(name="log", args=[TypeNumberOrString()], return_type=TypeNumber()))
-        math.add(TypeFunction(name="sqrt", args=[TypeNumberOrString()], return_type=TypeNumber()))
-        math.add(TypeFunction(name="cos", args=[TypeNumberOrString()], return_type=TypeNumber()))
-        math.add(TypeFunction(name="sin", args=[TypeNumberOrString()], return_type=TypeNumber()))
-        math.add(TypeFunction(name="tan", args=[TypeNumberOrString()], return_type=TypeNumber()))
-        math.add(TypeFunction(name="atan", args=[TypeNumberOrString()], return_type=TypeNumber()))
-        math.add(TypeFunction(name="atan2", args=[TypeNumberOrString(), TypeNumberOrString()], return_type=TypeNumber()))
-        math.add(TypeFunction(name="rad", args=[TypeNumberOrString()], return_type=TypeNumber()))
-        math.add(TypeFunction(name="random", args=[TypeNumberOrString(), TypeNumberOrString()], return_type=TypeNumber(), min_args=1))
+        math.add(TypeFunction(name="max", args=[TypeNumberOrString(), TypeNumberOrString()], return_type=TypeNumber(), pure=True))
+        math.add(TypeFunction(name="min", args=[TypeNumberOrString(), TypeNumberOrString()], return_type=TypeNumber(), pure=True))
+        math.add(TypeFunction(name="fmod", args=[TypeNumberOrString(), TypeNumberOrString()], return_type=TypeNumber(), pure=True))
+        math.add(TypeFunction(name="pow", args=[TypeNumberOrString(), TypeNumberOrString()], return_type=TypeNumber(), pure=True))
+        math.add(TypeFunction(name="ceil", args=[TypeNumberOrString()], return_type=TypeNumber(), pure=True))
+        math.add(TypeFunction(name="floor", args=[TypeNumberOrString()], return_type=TypeNumber(), pure=True))
+        math.add(TypeFunction(name="abs", args=[TypeNumberOrString()], return_type=TypeNumber(), pure=True))
+        math.add(TypeFunction(name="log10", args=[TypeNumberOrString()], return_type=TypeNumber(), pure=True))
+        math.add(TypeFunction(name="log", args=[TypeNumberOrString()], return_type=TypeNumber(), pure=True))
+        math.add(TypeFunction(name="sqrt", args=[TypeNumberOrString()], return_type=TypeNumber(), pure=True))
+        math.add(TypeFunction(name="cos", args=[TypeNumberOrString()], return_type=TypeNumber(), pure=True))
+        math.add(TypeFunction(name="sin", args=[TypeNumberOrString()], return_type=TypeNumber(), pure=True))
+        math.add(TypeFunction(name="tan", args=[TypeNumberOrString()], return_type=TypeNumber(), pure=True))
+        math.add(TypeFunction(name="atan", args=[TypeNumberOrString()], return_type=TypeNumber(), pure=True))
+        math.add(TypeFunction(name="atan2", args=[TypeNumberOrString(), TypeNumberOrString()], return_type=TypeNumber(), pure=True))
+        math.add(TypeFunction(name="rad", args=[TypeNumberOrString()], return_type=TypeNumber(), pure=True))
+        math.add(TypeFunction(name="random", args=[TypeNumberOrString(), TypeNumberOrString()], return_type=TypeNumber(), min_args=1, pure=True))
         math.add("pi", TypeNumber())
         math.add("huge", TypeNumber())
         return math
@@ -47,15 +47,16 @@ def MakeTableModule():
 
 def MakeStringModule():
         type = TypeModule("string")
-        type.add(TypeFunction(name="len", args=[TypeNotNil()], return_type=TypeNumber()))
+        type.add(TypeFunction(name="len", args=[TypeNotNil()], return_type=TypeNumber(), pure=True))
         # these should preserve taint
-        type.add(TypeFunction(name="sub", args=[TypeString(), TypeNumber(), TypeNumber()], return_type=TypeString(tainted=False), min_args=2))
-        type.add(TypeFunction(name="find", args=[TypeString(), TypeString(), TypeNumber(), TypeBool()], return_type=TypeUnion(TypeNil(), TypeNumber()), min_args=2))
-        type.add(TypeFunction(name="rep", args=[TypeString(), TypeNumber()], return_type=TypeString()))
-        type.add(TypeFunction(name="byte", args=[TypeString(), TypeNumber()], return_type=TypeNumber(), min_args=1))
+        type.add(TypeFunction(name="sub", args=[TypeString(), TypeNumber(), TypeNumber()], return_type=TypeString(tainted=False), min_args=2, pure=True))
+        type.add(TypeFunction(name="find", args=[TypeString(), TypeString(), TypeNumber(), TypeBool()], return_type=TypeUnion(TypeNil(), TypeNumber()), min_args=2, pure=True))
+        type.add(TypeFunction(name="rep", args=[TypeString(), TypeNumber()], return_type=TypeString(), pure=True))
+        type.add(TypeFunction(name="byte", args=[TypeString(), TypeNumber()], return_type=TypeNumber(), min_args=1, pure=True))
         
         string_format = TypeFunctionAny(name="format")
         string_format.module = "string"
+        string_format.pure = True
 
         type.add(string_format)
         type.add(TypeFunctionAny(name="gsub"))
@@ -98,7 +99,11 @@ def make_global_scope(bindings_global):
         register_global(TypeFunction(name="tonumber", args=[TypeAny()], return_type=TypeUnion(TypeNumber(), TypeNil())))
         
         for symbol in GLOBAL_SYMBOLS:
+                query = False
+                if isinstance(symbol, tuple):
+                        symbol, query = symbol
                 global_scope[symbol] = TypeFunctionAny(name=symbol)
                 global_scope[symbol].is_global = True
+                global_scope[symbol].query = query
                 
         return global_scope

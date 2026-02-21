@@ -678,6 +678,7 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
                                         name = "local " + self.grandparent().targets[0].id
 
                 type = TypeFunction(name=name, args=args, min_args=0)
+                type.pure = True # this should be inherited from the function calls this function makes
                 self.mark_deferred_validate(node, type)
 
                 self.set_type(node, type)
@@ -758,6 +759,8 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
                 countcall(func)
                 args_valid = self.validate_args(func, args)
                 rtype = self.get_binding_return_type(func, args, args_valid)
+                if self.state.const and not func.query and not func.pure:
+                        self.error("call to mutating function", node)
                 self.set_type(node, rtype)
                 self.set_terminating(node, func.no_return)
 

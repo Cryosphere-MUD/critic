@@ -55,7 +55,7 @@ def arg_type(s):
         return type
 
 class MudEvent:
-        def __init__(self, event_args, return_type):
+        def __init__(self, event_args, return_type, const):
                 self._args = {}
 
                 for arg in event_args:
@@ -65,6 +65,8 @@ class MudEvent:
                         self.return_type = [arg_type(t) for t in return_type]
                 else:
                         self.return_type = None
+
+                self.const = const
 
         def items(self):
                 yield from self._args.items()
@@ -92,7 +94,7 @@ if has_events():
                         valid_events[event_name] = True
                         continue
 
-                valid_events[event_name] = MudEvent(event_args, event.return_type)
+                valid_events[event_name] = MudEvent(event_args, event.return_type, event.const)
 
 
 def check_valid_action(verb):

@@ -560,7 +560,7 @@ def TypeNilString():
 
 
 class TypeFunction(TypeBase):
-        def __init__(self, *, name, min_args = None, max_args = None, args, varargs = False, return_type = None, return_types = None, no_return = False):
+        def __init__(self, *, name, min_args = None, max_args = None, args, varargs = False, return_type = None, return_types = None, no_return = False, query = False, pure = False):
                 if min_args is None:
                         min_args = len(args)
                 if max_args is None:
@@ -576,6 +576,8 @@ class TypeFunction(TypeBase):
                         return_types = (TypeAny(), )
                 self.return_types = return_types
                 self.no_return = no_return
+                self.query = query
+                self.pure = pure
                 self.visiting_from_call = 0
 
         def __str__(self):
