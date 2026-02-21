@@ -1,3 +1,6 @@
 [submodule "py-lua-parser"]
 	path = src/py-lua-parser
 	url = https://github.com/boolangery/py-lua-parser
+[submodule "engines/asteriamud"]
+	path = src/engines/asteriamud
+	url = https://github.com/g7138580/asteriamud.git

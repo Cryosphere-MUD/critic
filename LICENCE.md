@@ -1,4 +1,4 @@
-Note: This Licence applies to files except for those in musicmud-tests.
+Note: This Licence applies to files except for those in tests/musicmud-tests.
 
 Copyright (c) 2025 Abigail Brady
 

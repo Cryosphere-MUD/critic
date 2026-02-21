@@ -3,11 +3,10 @@ from types import MappingProxyType
 
 from mudtypes import TypeSpecificMudObject
 from mudversion import get_world_path, get_intrinsic_zones
+from engines import extract
 
 def load_universe():
-        with open(get_world_path()) as world_json:
-                UNIVERSE = json.load(world_json)
-                world_json.close()
+        UNIVERSE = extract.get_world()
 
 
         for obj in UNIVERSE:

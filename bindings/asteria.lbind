@@ -1,8 +1,23 @@
 module
 
-Log(string msg)
+struct item {
+}
 
-Send(unit target, string msg)
+struct unit {
+}
+
+struct room {
+}
+
+global item ch
+global int vnum
+global room room
+
+global int NULL
+
+void Log(string msg)
+
+void Send(unit target, string msg)
 
 item CreateItem(int id)
 
