@@ -1,0 +1,84 @@
+module
+
+Log(string msg)
+
+Send(unit target, string msg)
+
+item CreateItem(int id)
+
+unit AddMonsterToRoom(room room, int id, bool show_message)
+
+bool MobileHasItem(unit unit, int id)
+
+bool RoomHasItem(room room, int id)
+
+void Kill(unit unit, unit target)
+
+void Restore(unit unit)
+
+void Act(unit unit, int flags, any arg1, any arg2, string text)
+
+int GetHealth(unit unit)
+
+int GetMaxHealth(unit unit)
+
+int GetMana(unit unit)
+
+int GetMaxMana(unit unit)
+
+item GetItem(unit unit, int id)
+
+void DestroyItem(item item)
+
+void GiveItem(unit unit, item item)
+
+void DropItem(unit unit, int item)
+
+void RoomEcho(room room, string msg)
+
+int GetGold(unit unit)
+
+void TakeGold(unit unit, int amount)
+
+void Freeze(unit unit)
+
+void Unfreeze(unit unit)
+
+void Transfer(unit unit, string zone_id, int room_id)
+
+bool InCombat(unit unit)
+
+void Echo(string text)
+
+room GetRoom(string zone_name, int room_id)
+
+int GetRoomID(room room)
+
+void Open(room room, int dir)
+
+int CompletedQuest(unit unit, int id)
+
+int GetGuild(unit unit)
+
+int GetGuildRank(unit unit)
+
+void MovileMobile(unit unit, int dir)
+
+item GetItemFromMobile(unit unit, int item_id)
+
+void SendRoom(room room, string msg)
+
+void PurgeMonster(unit unit)
+
+bool MonsterExists(int id)
+
+unit | nil GetMonsterInRoom(room room, int id)
+
+void SetBalance(unit unit, int amount)
+
+int GetLevel(unit unit)
+
+int GetBloodline(unit unit)
+
+bool IsFlying(unit unit)
+
