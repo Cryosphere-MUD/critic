@@ -252,7 +252,7 @@ def global_void(self, args):
 
 def global_quests(self, args):
         from universe import valid_quests
-        return TypeUnion(*valid_quests.values())
+        return TypeTable()
 
 
 def global_owner(self, args):

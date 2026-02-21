@@ -45,15 +45,15 @@ def check_files(directory, should_pass):
 def main():
     any_failed = False
 
-    any_failed |= check_files("aardwolf-tests/valid", should_pass=True)
-    any_failed |= check_files("aardwolf-tests/failing", should_pass=False)
+    any_failed |= check_files("tests/aardwolf-tests/valid", should_pass=True)
+    any_failed |= check_files("tests/aardwolf-tests/failing", should_pass=False)
 
     if is_musicmud():
-        any_failed |= check_files("musicmud-tests/valid", should_pass=True)
-        any_failed |= check_files("musicmud-tests/failing", should_pass=False)
+        any_failed |= check_files("tests/musicmud-tests/valid", should_pass=True)
+        any_failed |= check_files("tests/musicmud-tests/failing", should_pass=False)
 
-    any_failed |= check_files("standalone-tests/valid", should_pass=True)
-    any_failed |= check_files("standalone-tests/failing", should_pass=False)
+    any_failed |= check_files("tests/standalone-tests/valid", should_pass=True)
+    any_failed |= check_files("tests/standalone-tests/failing", should_pass=False)
 
     if any_failed:
         print("Some tests failed.")
