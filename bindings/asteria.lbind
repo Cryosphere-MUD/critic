@@ -9,11 +9,13 @@ struct unit {
 struct room {
 }
 
-global item ch
+global unit ch
 global int vnum
 global room room
 
 global int NULL
+global int ACT_OTHERS
+global int ACT_SELF
 
 void Log(string msg)
 
@@ -47,7 +49,7 @@ void DestroyItem(item item)
 
 void GiveItem(unit unit, item item)
 
-void DropItem(unit unit, int item)
+void DropItem(room room, int item)
 
 void RoomEcho(room room, string msg)
 

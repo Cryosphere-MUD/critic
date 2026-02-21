@@ -2,7 +2,10 @@ import json
 
 config = None
 
-config_file = ".critic.config"
+config_file = "config.asteria"
+
+def set_config_file(new_file):
+        config_file = new_file
 
 def get_config():
         global config
@@ -15,7 +18,7 @@ def get_config():
                                 config = json.load(verbs_json)
                 except FileNotFoundError:
                         config = {}
-                
+
         return config
 
 def get_bindings_glob():

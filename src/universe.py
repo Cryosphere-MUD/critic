@@ -6,6 +6,7 @@ from mudversion import get_world_path, get_intrinsic_zones
 from engines import extract
 
 def load_universe():
+
         UNIVERSE = extract.get_world()
 
 
@@ -41,9 +42,8 @@ UNIVERSE_BY_ID["@musicmud"] = dict(id="@musicmud")
 
 TREATAS_USERS = {}
 
-if get_world_path() is not None:
 
-        load_universe()
+load_universe()
 
-        UNIVERSE_BY_ID = MappingProxyType(UNIVERSE_BY_ID)
+UNIVERSE_BY_ID = MappingProxyType(UNIVERSE_BY_ID)
 

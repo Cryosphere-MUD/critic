@@ -7,14 +7,16 @@ check:prepare-venv
 
 validate: prepare-venv dump-lua validate-lua
 
+ifneq ("$(wildcard .critic.Makefile)","")
+  include .critic.Makefile
+else
+  include .critic.Makefile-default
+endif
+
 prepare-venv:
 	test -d venv || python3 -m venv venv
 	. venv/bin/activate && pip install --upgrade pip
 	. venv/bin/activate && pip install multimethod antlr4-python3-runtime luapatt
-
-dump-lua:
-	make -C ../src musicmud
-	cd ../ && src/musicmud --dump
 
 validate-lua:
 	@if [ -f .critic.config ]; then \

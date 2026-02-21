@@ -11,6 +11,7 @@ from chunkvalidate import validate_chunk
 CHUNKS = []
 
 parser = argparse.ArgumentParser()
+parser.add_argument("--config", help="Specify the config file to use")
 parser.add_argument("--spellcheck", help="Enable spellchecking mode", action="store_true")
 parser.add_argument("--world", help="Only validate the world, no verbs", action="store_true")
 parser.add_argument("--unknown", help="Errors for unknown events", action="store_true")
@@ -22,6 +23,8 @@ args = parser.parse_args()
 
 if args.no_warnings:
         set_no_warnings(True)
+
+print(args.config)
 
 import spellcheck
 if args.spellcheck:

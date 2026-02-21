@@ -127,8 +127,6 @@ def parse_bindings(file):
 
 		line = decl
 
-		decl = decl.lower()
-
 		attributes = []
 
 		if "] " in decl:

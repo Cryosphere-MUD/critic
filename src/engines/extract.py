@@ -22,7 +22,7 @@ def get_world():
 				continue
 
 			if trigger_text:
-				trigger_buffer += line
+				trigger_buffer += line + "\n"
 
 			if line.startswith('\t'):
 				line = line.strip()
