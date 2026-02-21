@@ -4,7 +4,7 @@ from mudtypes import TypeMudObjectOrID
 from mudglobals import register_mud_global_scope
 from mudversion import is_musicmud, is_aardmud
 
-GLOBAL_SYMBOLS = (("pairs", True), ("ipairs", True), "explode", "loadstring", "strbyte", 
+GLOBAL_SYMBOLS = ("explode", "loadstring", "strbyte", 
                   "pcall", "unpack", "next", "xpcall", "load")
 
 def MakeMathModule():
@@ -59,11 +59,12 @@ def MakeStringModule():
         string_format.pure = True
 
         type.add(string_format)
-        type.add(TypeFunctionAny(name="gsub"))
-        type.add(TypeFunctionAny(name="reverse"))
+        type.add(TypeFunction(name="gsub", args=[TypeString(), TypeString(), TypeString(), TypeNumber()], min_args=3, return_type=TypeString()))
+        type.add(TypeFunction(name="reverse", args=[TypeString()], return_type=TypeString()))
         type.add(TypeFunctionAny(name="char"))
-        type.add(TypeFunctionAny(name="upper"))
+        type.add(TypeFunction(name="upper", args=[TypeString()], return_type=TypeString()))
         type.add(TypeFunction(name="lower", args=[TypeString()], return_type=TypeString()))
+        type.add(TypeFunction(name="match", args=[TypeString()], return_type=TypeString()))
         type.add(TypeFunctionAny(name="match"))
         type.add(TypeFunctionAny(name="gmatch"))
         return type
@@ -98,6 +99,9 @@ def make_global_scope(bindings_global):
         register_global(TypeFunction(name="tostring", args=[TypeAny()], return_type=TypeString()))
         register_global(TypeFunction(name="tonumber", args=[TypeAny()], return_type=TypeUnion(TypeNumber(), TypeNil())))
         
+        register_global(TypeFunction(name="ipairs", args=[TypeTable()], return_types=[TypeNumber(), TypeAny()], query=True))
+        register_global(TypeFunction(name="pairs", args=[TypeTable()], return_types=[TypeAny(), TypeAny()], query=True))
+
         for symbol in GLOBAL_SYMBOLS:
                 query = False
                 if isinstance(symbol, tuple):
