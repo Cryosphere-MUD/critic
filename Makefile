@@ -2,8 +2,8 @@ check:prepare-venv
 	@if [ -f .critic.config ]; then \
 		$(MAKE) dump-lua; \
 	fi
-	ln -sfn py-lua-parser/luaparser .
-	. venv/bin/activate && ./validate-this.py
+	ln -sfn py-lua-parser/luaparser src
+	. venv/bin/activate && src/validate-this.py
 
 validate: prepare-venv dump-lua validate-lua
 
@@ -20,6 +20,6 @@ validate-lua:
 	@if [ -f .critic.config ]; then \
 		$(MAKE) dump-lua; \
 	fi
-	ln -sfn py-lua-parser/luaparser .
-	venv/bin/python ./validator.py
+	ln -sfn py-lua-parser/luaparser src
+	venv/bin/python src/validator.py
 
