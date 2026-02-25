@@ -10,12 +10,15 @@ from evalstring import StringEvaluator
 from evalcomparison import ComparisonEvaluator
 from evallogic import LogicEvaluator
 
+import sys, os
+
 import functions
 
 FUNCTION_MODULES = [functions]
 
 if is_musicmud():
-    import mudfunctions
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/..")
+    from lib import mudfunctions
     FUNCTION_MODULES.append(mudfunctions)
 
 

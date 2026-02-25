@@ -81,7 +81,7 @@ valid_events: dict[str, bool | list[str]] = {}
 
 if has_events():
 
-        sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/..")
 
         from lib import events
 
