@@ -59,7 +59,9 @@ def MakeStringModule():
         string_format.pure = True
 
         type.add(string_format)
-        type.add(TypeFunction(name="gsub", args=[TypeString(), TypeString(), TypeString(), TypeNumber()], min_args=3, return_type=TypeString()))
+
+	# TypeAny here should be some kind of function type
+        type.add(TypeFunction(name="gsub", args=[TypeString(), TypeString(), TypeUnion(TypeString(), TypeAny(), TypeTable()), TypeNumber()], min_args=3, return_type=TypeString()))
         type.add(TypeFunction(name="reverse", args=[TypeString()], return_type=TypeString()))
         type.add(TypeFunctionAny(name="char"))
         type.add(TypeFunction(name="upper", args=[TypeString()], return_type=TypeString()))
