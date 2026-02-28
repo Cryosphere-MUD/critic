@@ -1,4 +1,4 @@
-from luatypes import TypeBase, TypeString, TypeTable, TypeAny, TypeNumberRange
+from luatypes import TypeBase, TypeString, TypeTable, TypeAny, TypeNumberRange, TypeWithFields
 
 CHECK_MUDOBJECT_ID = None
 
@@ -6,7 +6,7 @@ def setValidator(validator):
         global CHECK_MUDOBJECT_ID
         CHECK_MUDOBJECT_ID = validator
 
-class TypeMudObject(TypeBase):
+class TypeMudObject(TypeBase, TypeWithFields):
         def __init__(self, invoker = False):
                 self.is_invoker = invoker
 
@@ -41,6 +41,9 @@ class TypeMudObject(TypeBase):
                 return super().convertible_from(source)
 
         def check_field(self, fieldname):
+
+                if self.is_invoker and fieldname == "id":
+                        return TypeString("@pl", tainted=False)
 
                 if fieldname in ("id", "short"):
                         return TypeString(tainted=False)
