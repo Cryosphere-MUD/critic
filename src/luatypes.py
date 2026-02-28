@@ -180,6 +180,11 @@ class AnyModule(TypeModule):
                 super().__init__()
 
 
+class TypeWithFields:
+        def __init__(self):
+                super().__init__()
+
+
 class TypeBool(TypeBase):
         def __init__(self, value = None):
                 self.value = value

@@ -1,8 +1,8 @@
-from luatypes import TypeBase, TypeTable, TypeAny
+from luatypes import TypeBase, TypeTable, TypeAny, TypeWithFields
 
 from pprint import pprint
 
-class TypeStruct(TypeTable):
+class TypeStruct(TypeTable, TypeWithFields):
 
         def __init__(self, name, fields):
                 self.id = name
