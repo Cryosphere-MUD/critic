@@ -80,6 +80,12 @@ class TypeSpecificMudObject(TypeMudObject):
         def __str__(self):
                 return f"mudobject:{self.id}"
 
+        def combine_types(self, types):
+                for t in types:
+                        if isinstance(t, TypeMudObject) and not isinstance(t, TypeSpecificMudObject):
+                                return t
+                return self
+
         def check_treatas_field(self, fieldname):
                 if fieldname[0] == '!':
                         return TypeAny()
