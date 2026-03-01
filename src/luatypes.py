@@ -52,6 +52,9 @@ class TypeBase:
         
         def strings(self):
                 return []
+        
+        def combine_types(self, types):
+                return self
 
         def lookup_method(self, methodname):
                 return None
@@ -612,16 +615,16 @@ def TypeUnion(*args):
 
         if any(isinstance(t, TypeAny) for t in args):
                 return TypeAny()
+        
+        if len(args) == 1:
+                return next(iter(args))
 
         type_set = set()
         string_values = set()
-        mud_objects = set()
         bool_values = set()
         any_string = False
         any_mudobject = False
         string_tainted = False
-
-        from mudtypes import TypeSpecificMudObject, TypeMudObject
 
         def add(t):
                 nonlocal string_tainted
@@ -635,25 +638,21 @@ def TypeUnion(*args):
                         else:
                                 nonlocal any_string
                                 any_string = True
-                elif isinstance(t, TypeSpecificMudObject):
-                        mud_objects.add(t)
                 elif isinstance(t, TypeBool):
                         nonlocal bool_values
                         bool_values |= set(t.bools())
-                elif isinstance(t, TypeMudObject):
-                        nonlocal any_mudobject
-                        any_mudobject = True
                 else:
                         type_set.add(t)
-
+                        
         for arg in args:
                 add(arg)
 
-        if any_mudobject:
-                type_set.add(TypeMudObject())
-        else:
-                for mo in mud_objects:
-                        type_set.add(mo)
+        combined_types = set()
+
+        for t in type_set:
+                combined_types.add(t.combine_types(type_set))
+
+        type_set = combined_types
 
         if bool_values:
                 if len(bool_values) == 2:
