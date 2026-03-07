@@ -907,6 +907,8 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
                                 string = True
                                 key = f.key.s
                         elif f.key is None:
+                                if isinstance(key, str): 
+                                   self.error(f"mixed key and array table initialiser", f.key)
                                 key = key + 1
                         else:
                                 self.error(f"unexpected key {f.key} in table", f.key)
