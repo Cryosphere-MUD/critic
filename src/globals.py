@@ -99,6 +99,8 @@ def make_global_scope(bindings_global):
         register_global(TypeFunction(name="ipairs", args=[TypeTable()], return_types=[TypeNumber(), TypeAny()], query=True))
         register_global(TypeFunction(name="pairs", args=[TypeTable()], return_types=[TypeAny(), TypeAny()], query=True))
 
+        register_global(TypeFunction(name="static_assert", args=[TypeAny()]))
+
         for symbol in GLOBAL_SYMBOLS:
                 query = False
                 if isinstance(symbol, tuple):
@@ -111,6 +113,5 @@ def make_global_scope(bindings_global):
                 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/..")
                 from lib import mudglobals
                 mudglobals.register_mud_global_scope(global_scope)
-
 
         return global_scope
