@@ -1,8 +1,7 @@
 from luatypes import CapitalsModule, TypeNumber, TypeAny, TypeModule, TypeFunction, TypeString, TypeBool, TypeFunctionAny, TypeUnion, TypeNil, TypeTable, TypeNotNil
-from mudtypes import TypeMudObjectOrID
-
-from mudglobals import register_mud_global_scope
-from mudversion import is_musicmud, is_aardmud
+from mudversion import is_musicmud
+import sys
+import os
 
 GLOBAL_SYMBOLS = ("explode", "loadstring", "strbyte", 
                   "pcall", "unpack", "next", "xpcall", "load")
@@ -81,9 +80,6 @@ def make_global_scope(bindings_global):
         global_scope["table"] = MakeTableModule()
         global_scope["string"] = MakeStringModule()
 
-        if is_musicmud():
-                register_mud_global_scope(global_scope)
-
         global_assert = TypeFunction(name="assert", args=[TypeAny()])
         global_assert.global_assert = True
 
@@ -97,7 +93,6 @@ def make_global_scope(bindings_global):
 
         register_global(global_print)
 
-        register_global(TypeFunction(name="static_assert", args=[TypeAny()]))
         register_global(TypeFunction(name="tostring", args=[TypeAny()], return_type=TypeString()))
         register_global(TypeFunction(name="tonumber", args=[TypeAny()], return_type=TypeUnion(TypeNumber(), TypeNil())))
         
@@ -112,4 +107,10 @@ def make_global_scope(bindings_global):
                 global_scope[symbol].is_global = True
                 global_scope[symbol].query = query
                 
+        if is_musicmud():
+                sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/..")
+                from lib import mudglobals
+                mudglobals.register_mud_global_scope(global_scope)
+
+
         return global_scope
