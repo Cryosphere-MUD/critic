@@ -1,11 +1,19 @@
 #!/usr/bin/env python3
 
-import sys, typing, argparse
+import os, sys, typing, argparse
 import glob
 from errors import had_error, set_no_warnings
+from mudversion import is_musicmud
 from luatypes import TypeAny
-from universe import UNIVERSE_BY_ID, TREATAS_USERS
-from worldchecker import check_world
+
+if is_musicmud:
+        sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/..")
+        from lib.worldchecker import check_world
+        from lib  import universe
+        all_context = universe.UNIVERSE_BY_ID
+else:
+        all_context = None
+
 from chunkvalidate import validate_chunk
 
 CHUNKS = []
@@ -49,7 +57,7 @@ if CHUNKS:
                 print("all ok")
                 exit(0)
 
-check_world(UNIVERSE_BY_ID, args, ZONE)
+check_world(all_context, args, ZONE)
 
 #        for file in glob.glob(TMP_PREFIX + "*lua*"):
 #                process_file(file)
