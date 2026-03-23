@@ -1,6 +1,8 @@
+import sys, os
 from luaparser import ast
 from types import MappingProxyType
 
+from mudversion import is_musicmud
 from mudtypes import TypeMudObject
 from bindings import BINDINGS, MODULE_SYMBOLS, CLASS_METHODS
 from bindingsparser import global_symbols
@@ -8,11 +10,17 @@ from context import get_default_context
 from globals import make_global_scope
 from errors import error, got_error
 import parents
-from universe import UNIVERSE_BY_ID
 from symbolresolver import resolve_symbols
 from validatorstate import ValidatorState
 from visitor import MusicLUAVisitor
 from extrachunk import extra_chunks
+
+if is_musicmud():
+        sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/..")
+        from lib import universe
+        all_context = universe.UNIVERSE_BY_ID
+else:
+        all_context = None
 
 GLOBALS = None
 
@@ -59,8 +67,7 @@ def validate_chunk(lua, context = None, rewrite_warning_disabled = False, itemid
 
         if not no_detailed:
 
-                v = MusicLUAVisitor(universe=UNIVERSE_BY_ID,
-                                    state=state)
+                v = MusicLUAVisitor(universe=all_context, state=state)
         
                 v.visit(tree)
 

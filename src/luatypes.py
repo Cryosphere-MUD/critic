@@ -451,7 +451,7 @@ class TypeZoneTag(TypeConstrainedString):
                 super().__init__(tainted=False)
 
         def test_string_validity(self, value):
-                from universe import valid_zonetags
+                from lib.universe import valid_zonetags
                 return value in valid_zonetags
 
 
