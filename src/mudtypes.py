@@ -1,4 +1,4 @@
-from luatypes import TypeBase, TypeString, TypeTable, TypeAny, TypeNumberRange, TypeWithFields
+from luatypes import TypeBase, TypeString, TypeTable, TypeAny, TypeNumberRange, TypeWithFields, TypeBool
 
 CHECK_MUDOBJECT_ID = None
 
@@ -65,6 +65,28 @@ class TypeMudObject(TypeBase, TypeWithFields):
                 from bindings import CLASS_METHODS
                 return CLASS_METHODS["mudobject"].get(methodname)
 
+def represent_type(field):
+        if type(field) == str:
+                return TypeString(field, tainted = False)
+        if type(field) == bool:
+                return TypeBool(field)
+        if type(field) == int:
+                return TypeNumberRange(field)
+
+        if type(field) == list:
+                map = {}
+                for i, v in enumerate(field):
+                        map[i + 1] = represent_type(v)
+                return TypeTable(map)
+                                
+        if type(field) == dict:
+                map = {}
+                for i, v in field.items():
+                        map[i] = represent_type(v)
+                return TypeTable(map)
+
+        assert False
+
 
 class TypeSpecificMudObject(TypeMudObject):
         def __init__(self, mudobject):
@@ -91,32 +113,31 @@ class TypeSpecificMudObject(TypeMudObject):
                         return TypeAny()
                 if fieldname[0] == '$':
                         return TypeAny()
+
                 if fieldname in self.mudobject:
-                        field = self.mudobject[fieldname]
-                        if type(field) == str:
-                                return TypeString(field)
-                        if type(field) == int:
-                                return TypeNumberRange(field)
-                        return TypeAny()
+                        return represent_type(self.mudobject.get(fieldname))
                 
                 treatas = self.mudobject.get("treatas")
                 if treatas:
                         treatas_obj = CHECK_MUDOBJECT_ID(treatas)
                         if treatas_obj:
-                                return TypeSpecificMudObject(treatas_obj).check_treatas_field(fieldname)
-                        print(f"invalid treatas {treatas}")
-                        exit(1)
+                                if TypeSpecificMudObject(treatas_obj).check_treatas_field(fieldname):
+                                        return True
+
+                for i in range(self.mudobject.get("treatas.count", 0)):
+                        treatas = self.mudobject.get("treatas." + str(i))
+                        if treatas:
+                                treatas_obj = CHECK_MUDOBJECT_ID(treatas)
+                                if treatas_obj:
+                                        if TypeSpecificMudObject(treatas_obj).check_treatas_field(fieldname):
+                                                return True
 
 
         def check_field(self, fieldname):
-
+                
                 if fieldname in self.mudobject:
-                        field = self.mudobject[fieldname]
-                        if type(field) == str:
-                                return TypeString(field, tainted = False)
-                        if type(field) == int:
-                                return TypeNumberRange(field)
-                        return TypeAny()
+                        field = represent_type(self.mudobject[fieldname])
+                        return field
                 
                 return super().check_field(fieldname)
 

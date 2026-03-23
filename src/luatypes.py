@@ -246,9 +246,23 @@ class TypeTable(TypeBase):
 
         def __str__(self):
                 if table := self._table:
+                        # s = ""
+                        # for k, v in self._table.items():
+                        #         s += k + ":" + str(v)
+                        # return "{" + s + "}"
+                        
                         return f"table[{len(table)}]"
                 return "table"
+        
+        def check_field(self, field):
+                if not self._table:
+                        return TypeAny()
+                
+                if field in self._table:
+                        return self._table[field]
 
+                return TypeNil()
+                
         def convertible_from(self, source):
                 if type(self) == type(source):
                         return True
