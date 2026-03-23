@@ -952,29 +952,29 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
                 symbol_type = self.get_type(node.value)
         
                 # this handles the o1.rooms.count case
-                if (not isinstance(symbol_type, TypeAny) and
-                    node.notation == ast.IndexNotation.DOT and 
-                    isinstance(node.value, astnodes.Index) and 
-                    node.value.notation == ast.IndexNotation.DOT):
+                # if (not isinstance(symbol_type, TypeAny) and
+                #     node.notation == ast.IndexNotation.DOT and 
+                #     isinstance(node.value, astnodes.Index) and 
+                #     node.value.notation == ast.IndexNotation.DOT):
 
-                        str_value = None
+                #         str_value = None
 
-                        if isinstance(node.value.value, astnodes.Name):
-                                inner_symbol_type = self.get_type(node.value.value)
-                                if isinstance(inner_symbol_type, (TypeWithFields, TypeStruct)):
-                                        str_value = node.value.idx.id + "." + node.idx.id
+                #         if isinstance(node.value.value, astnodes.Name):
+                #                 inner_symbol_type = self.get_type(node.value.value)
+                #                 if isinstance(inner_symbol_type, (TypeWithFields, TypeStruct)):
+                #                         str_value = node.value.idx.id + "." + node.idx.id
 
-                        self.set_type(node, TypeAny())
+                #         self.set_type(node, TypeAny())
 
-                        if str_value:
-                                if field_type := inner_symbol_type.check_field(str_value):
-                                        self.set_type(node, field_type)
-                                else:
-                                        # self.warning(f"unknown field {str_value} on {symbol_type.id}")
-                                        # these actually come out as Nil if they're not defined
-                                        self.set_type(node, TypeAny())
+                #         if str_value:
+                #                 if field_type := inner_symbol_type.check_field(str_value):
+                #                         self.set_type(node, field_type)
+                #                 else:
+                #                         # self.warning(f"unknown field {str_value} on {symbol_type.id}")
+                #                         # these actually come out as Nil if they're not defined
+                #                         self.set_type(node, TypeAny())
 
-                        return
+                #         return
 
                 if isinstance(node.value, astnodes.Name):
                         symbol = self.find_symbol(node.value)
@@ -1086,7 +1086,9 @@ class MusicLUAVisitor(ast.ASTRecursiveVisitor, ArithmeticEvaluator, StringEvalua
                                 self.set_type(node, resulting)
                                 return
                         
-                        self.set_type(node, TypeAny())
+                        field_type = symbol_type.check_field(node.idx.id)
+                        
+                        self.set_type(node, field_type or TypeAny())
                         return
 
                 if isinstance(symbol_type, TypeMap):
