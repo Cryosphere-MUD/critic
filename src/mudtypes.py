@@ -119,10 +119,17 @@ class TypeSpecificMudObject(TypeMudObject):
                 
                 treatas = self.mudobject.get("treatas")
                 if treatas:
-                        treatas_obj = CHECK_MUDOBJECT_ID(treatas)
-                        if treatas_obj:
-                                if TypeSpecificMudObject(treatas_obj).check_treatas_field(fieldname):
-                                        return True
+                        if isinstance(treatas, list):
+                                for treatas_member in treatas:
+                                        treatas_obj = CHECK_MUDOBJECT_ID(treatas_member)
+                                        if treatas_obj:
+                                                if TypeSpecificMudObject(treatas_obj).check_treatas_field(fieldname):
+                                                        return True
+                        else:
+                                treatas_obj = CHECK_MUDOBJECT_ID(treatas)
+                                if treatas_obj:
+                                        if TypeSpecificMudObject(treatas_obj).check_treatas_field(fieldname):
+                                                return True
 
                 for i in range(self.mudobject.get("treatas.count", 0)):
                         treatas = self.mudobject.get("treatas." + str(i))
